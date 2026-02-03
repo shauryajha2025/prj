@@ -2,226 +2,197 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PCAP Anomaly Analyzer</title>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>PCAP Anomaly Analyzer | Dashboard</title>
 
 <style>
-/* ===== CYBER THEME ===== */
-body {
-    margin: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: radial-gradient(circle at top, #0f2027, #000000);
-    color: #e0e0e0;
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family: "Segoe UI", Arial;
+    background: radial-gradient(circle at top, #0f2027, #000);
+    color:#e0e0e0;
 }
 
-.container {
-    max-width: 900px;
-    margin: 40px auto;
-    background: #0b1c1f;
-    border-radius: 12px;
-    box-shadow: 0 0 25px rgba(0,255,150,0.25);
-    padding: 30px;
+/* Layout */
+.wrapper{
+    display:flex;
+    min-height:100vh;
 }
 
-h1, h2, h3 {
-    color: #00ff9c;
-    text-shadow: 0 0 10px rgba(0,255,150,0.4);
+/* Sidebar */
+.sidebar{
+    width:240px;
+    background:#020d14;
+    padding:20px;
+    border-right:1px solid #0f3d4c;
+}
+.sidebar h2{
+    color:#00e6ff;
+    text-align:center;
+    margin-bottom:30px;
+}
+.sidebar a{
+    display:block;
+    color:#ccc;
+    padding:12px;
+    margin:8px 0;
+    text-decoration:none;
+    border-radius:6px;
+}
+.sidebar a:hover{
+    background:#00e6ff;
+    color:#000;
 }
 
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
+/* Main Content */
+.main{
+    flex:1;
+    padding:30px;
 }
 
-button {
-    background: transparent;
-    border: 1px solid #00ff9c;
-    color: #00ff9c;
-    padding: 8px 18px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: 0.3s;
+/* Cards */
+.card{
+    background:#071821;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 0 15px rgba(0,255,255,0.1);
+}
+.card h2{
+    color:#00e6ff;
 }
 
-button:hover {
-    background: #00ff9c;
-    color: #000;
-    box-shadow: 0 0 15px #00ff9c;
+/* Buttons */
+button{
+    background:#00e6ff;
+    color:#000;
+    border:none;
+    padding:10px 25px;
+    border-radius:6px;
+    cursor:pointer;
+}
+button:hover{background:#00bcd4}
+
+/* Inputs */
+input[type=text], input[type=password], input[type=file]{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    background:#020d14;
+    color:white;
+    border:1px solid #00e6ff;
+    border-radius:6px;
 }
 
-button.main {
-    padding: 12px 30px;
-    font-weight: bold;
-}
-
-input {
-    width: 80%;
-    padding: 12px;
-    margin: 12px 0;
-    background: #081316;
-    border: 1px solid #00ff9c;
-    color: #e0e0e0;
-    border-radius: 8px;
-}
-
-.section {
-    display: none;
-    margin-top: 30px;
-}
-
-.section.active {
-    display: block;
-}
-
-.faq {
-    background: #081316;
-    padding: 15px;
-    border-left: 3px solid #00ff9c;
-    margin-bottom: 15px;
-    border-radius: 8px;
-}
+/* Hide pages */
+.hidden{display:none}
+ul{margin-left:20px}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="wrapper">
 
-<!-- LOGIN -->
-<div id="login" class="section active">
-    <h1>Secure Login</h1>
-    <p>Enter your credentials</p>
-
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <br>
-    <button class="main" onclick="login()">Login</button>
-
-    <p id="loginError" style="color:#ff4d4d;"></p>
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>🔐 PCAP Analyzer</h2>
+    <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+    <a href="#" onclick="showPage('uploadPage')">Upload PCAP</a>
+    <a href="#" onclick="showPage('resultPage')">Results</a>
+    <a href="#" onclick="showPage('about')">About</a>
+    <a href="#" onclick="showPage('login')">Logout</a>
 </div>
 
-<!-- APP -->
-<div id="app" class="section">
+<!-- Main Area -->
+<div class="main">
 
-    <div class="navbar">
-        <h2>PCAP Analyzer Dashboard</h2>
-        <div>
-            <button onclick="showSection('dashboard')">Dashboard</button>
-            <button onclick="showSection('upload')">Upload</button>
-            <button onclick="showSection('faq')">FAQ</button>
-            <button onclick="logout()">Logout</button>
-        </div>
-    </div>
+<!-- Login -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="section active">
-        <h1>Welcome, Analyst</h1>
-        <p>Analyze network traffic and detect threats.</p>
-    </div>
+<!-- Dashboard -->
+<div id="dashboard" class="card hidden">
+    <h2>Cyber Security Dashboard</h2>
+    <p>
+        This dashboard analyzes <b>PCAP (Packet Capture)</b> files to detect
+        suspicious or anomalous network behavior.
+    </p>
+    <ul>
+        <li>✔ Detect abnormal packet patterns</li>
+        <li>✔ Identify possible intrusion attempts</li>
+        <li>✔ Improve network security visibility</li>
+    </ul>
+</div>
 
-    <!-- UPLOAD -->
-    <div id="upload" class="section">
-        <h2>Upload PCAP File</h2>
-        <input type="file" id="pcapFile" accept=".pcap">
-        <br>
-        <button class="main" onclick="analyzeFile()">Analyze</button>
+<!-- Upload -->
+<div id="uploadPage" class="card hidden">
+    <h2>Upload PCAP File</h2>
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze</button>
+</div>
 
-        <div id="result" style="margin-top:25px;"></div>
-        <canvas id="threatChart" style="margin-top:30px;"></canvas>
-    </div>
+<!-- Results -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p>File: <span id="resultFileName"></span></p>
+    <ul id="anomalyList"></ul>
+</div>
 
-    <!-- FAQ -->
-    <div id="faq" class="section">
-        <h2>FAQ</h2>
-        <div class="faq">
-            <h4>What is a PCAP file?</h4>
-            <p>A file containing captured network packets.</p>
-        </div>
-        <div class="faq">
-            <h4>Is this real analysis?</h4>
-            <p>No, this is a frontend demo for projects/hackathons.</p>
-        </div>
-    </div>
+<!-- About -->
+<div id="about" class="card hidden">
+    <h2>About the System</h2>
+    <p>
+        <b>PCAP Anomaly Analyzer</b> is a cyber security tool that inspects
+        captured network packets to identify unusual traffic patterns.
+    </p>
+    <p>
+        Such systems are used in:
+    </p>
+    <ul>
+        <li>Intrusion Detection Systems (IDS)</li>
+        <li>Network Forensics</li>
+        <li>Security Operations Centers (SOC)</li>
+    </ul>
+</div>
 
 </div>
 </div>
 
 <script>
-/* Demo credentials */
-const USERNAME = "admin";
-const PASSWORD = "admin123";
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
 
-let threatChart;
+function login(){
+    showPage('dashboard');
+}
 
-/* Login */
-function login() {
-    const u = document.getElementById("username").value;
-    const p = document.getElementById("password").value;
+function analyzeFile(){
+    const file = document.getElementById('pcapFile').files[0];
+    if(!file){alert("Select a PCAP file");return;}
+    document.getElementById('resultFileName').innerText=file.name;
 
-    if (u === USERNAME && p === PASSWORD) {
-        document.getElementById("login").classList.remove("active");
-        document.getElementById("app").classList.add("active");
-    } else {
-        document.getElementById("loginError").innerText = "Invalid credentials";
+    const list=document.getElementById('anomalyList');
+    list.innerHTML="";
+    let found=false;
+    for(let i=1;i<=20;i++){
+        if(Math.random()<0.15){
+            found=true;
+            let li=document.createElement('li');
+            li.innerText="Suspicious activity detected at packet "+i;
+            list.appendChild(li);
+        }
     }
+    if(!found) list.innerHTML="<li>No anomalies detected</li>";
+    showPage('resultPage');
 }
+</script>
 
-/* Navigation */
-function showSection(id) {
-    document.querySelectorAll('#app .section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-/* Logout */
-function logout() {
-    document.getElementById("app").classList.remove("active");
-    document.getElementById("login").classList.add("active");
-}
-
-/* Analysis + Graph */
-function analyzeFile() {
-    const fileInput = document.getElementById('pcapFile');
-    if (fileInput.files.length === 0) {
-        alert("Please upload a PCAP file");
-        return;
-    }
-
-    const fileName = fileInput.files[0].name;
-
-    // Dummy values
-    const threats = Math.floor(Math.random() * 10) + 5;
-    const malware = Math.floor(Math.random() * 6) + 2;
-    const normal = Math.floor(Math.random() * 25) + 10;
-
-    document.getElementById('result').innerHTML = `
-        <h3>Analysis Result</h3>
-        <p><b>File:</b> ${fileName}</p>
-        <ul>
-            <li style="color:#ff4d4d;">Threats: ${threats}</li>
-            <li style="color:#ff9933;">Malware: ${malware}</li>
-            <li style="color:#00ff9c;">Normal Packets: ${normal}</li>
-        </ul>
-    `;
-
-    const ctx = document.getElementById('threatChart').getContext('2d');
-
-    if (threatChart) threatChart.destroy();
-
-    threatChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Threats', 'Malware', 'Normal'],
-            datasets: [{
-                label: 'Packet Analysis',
-                data: [threats, malware, normal],
-                backgroundColor: ['#ff4d4d', '#ff9933', '#00ff9c']
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { ticks: { color: '#e0e0e0' } },
+</body>
+</html>
