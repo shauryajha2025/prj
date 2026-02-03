@@ -1,216 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Analyzer | Enterprise Edition</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<title>PCAP Anomaly Analyzer</title>
 
-    <style>
-        :root { --primary: #00ff88; --danger: #ff0055; --bg: #0b0c15; --card: #151621; --text: #e0e0e0; }
-        body { font-family: 'Segoe UI', monospace; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        
-        /* Navigation */
-        nav { background: rgba(21, 22, 33, 0.95); padding: 1rem 2rem; display: flex; justify-content: space-between; border-bottom: 1px solid #333; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); letter-spacing: 2px; }
-        .btn-nav { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 16px; cursor: pointer; margin-left: 10px; transition: 0.3s; }
-        .btn-nav:hover { background: var(--primary); color: #000; }
-        .hidden { display: none !important; }
+<style>
+/* ===== CYBER THEME ===== */
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: radial-gradient(circle at top, #0f2027, #000000);
+    color: #e0e0e0;
+}
 
-        /* Layout */
-        .page { display: none; padding: 2rem; flex: 1; align-items: center; justify-content: center; flex-direction: column; animation: fadeIn 0.5s; }
-        .page.active { display: flex; }
-        
-        /* Forms */
-        .card { background: var(--card); padding: 2rem; border-radius: 12px; border: 1px solid #333; width: 100%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
-        .btn-action { width: 100%; padding: 12px; background: var(--primary); border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #0b1c1f;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0,255,150,0.25);
+    padding: 30px;
+}
 
-        /* Dashboard */
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 1000px; }
-        .upload-zone { border: 2px dashed #444; padding: 2rem; text-align: center; cursor: pointer; grid-column: 1 / -1; }
-        .terminal { background: #000; font-family: 'Courier New', monospace; padding: 1rem; height: 300px; overflow-y: auto; border: 1px solid #333; color: var(--primary); text-align: left; }
-        .chart-container { background: var(--card); padding: 1rem; border: 1px solid #333; display: flex; align-items: center; justify-content: center; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+/* Headings */
+h1, h2, h3 {
+    color: #00ff9c;
+    text-shadow: 0 0 10px rgba(0,255,150,0.4);
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+/* Buttons */
+button {
+    background: transparent;
+    border: 1px solid #00ff9c;
+    color: #00ff9c;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #00ff9c;
+    color: #000;
+    box-shadow: 0 0 15px #00ff9c;
+}
+
+button.main {
+    padding: 12px 30px;
+    font-weight: bold;
+}
+
+/* Inputs */
+input {
+    width: 80%;
+    padding: 12px;
+    margin: 12px 0;
+    background: #081316;
+    border: 1px solid #00ff9c;
+    color: #e0e0e0;
+    border-radius: 8px;
+}
+
+/* Sections */
+.section {
+    display: none;
+    margin-top: 30px;
+}
+
+.section.active {
+    display: block;
+}
+
+/* FAQ */
+.faq {
+    background: #081316;
+    padding: 15px;
+    border-left: 3px solid #00ff9c;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+.faq h4 {
+    margin: 0;
+    color: #00ff9c;
+}
+
+ul {
+    text-align: left;
+}
+li {
+    margin: 6px 0;
+}
+</style>
 </head>
+
 <body>
 
-    <nav>
-        <div class="logo">NET.GUARD AI</div>
-        <div id="nav-buttons">
-            <button class="btn-nav" onclick="app.showPage('login')">Login</button>
-        </div>
-    </nav>
+<div class="container">
 
-    <div id="login" class="page active">
-        <div class="card">
-            <h2>Secure Access</h2>
-            <p>Enter Administrative Credentials</p>
-            <input type="email" id="email" placeholder="Username (admin)">
-            <input type="password" id="password" placeholder="Password (123)">
-            <button class="btn-action" onclick="app.login()">Authenticate</button>
-            <p id="login-error" style="color:var(--danger); font-size: 0.9rem; margin-top:10px;"></p>
+<!-- LOGIN PAGE -->
+<div id="login" class="section active">
+    <h1>Secure Login</h1>
+    <p>Enter your credentials to access the PCAP Analyzer</p>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <br>
+    <button class="main" onclick="login()">Login</button>
+
+    <p id="loginError" style="color:#ff4d4d;"></p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="app" class="section">
+
+    <div class="navbar">
+        <h2>PCAP Analyzer Dashboard</h2>
+        <div>
+            <button onclick="showSection('dashboard')">Dashboard</button>
+            <button onclick="showSection('upload')">Upload</button>
+            <button onclick="showSection('faq')">FAQ</button>
+            <button onclick="logout()">Logout</button>
         </div>
     </div>
 
-    <div id="dashboard" class="page">
-        <div class="dashboard-grid">
-            <div class="upload-zone" onclick="document.getElementById('csvInput').click()">
-                <h3>📂 Upload Traffic Logs (CSV)</h3>
-                <p>Auto-scan enabled: SQL Injection, XSS, & Bad IPs</p>
-                <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="app.processFile()">
-            </div>
-
-            <div class="terminal" id="terminal">
-                > System initialized...<br>
-                > WAF (Web Application Firewall) Rules loaded.<br>
-                > Waiting for data stream...
-            </div>
-
-            <div class="chart-container">
-                <canvas id="securityChart"></canvas>
-            </div>
-        </div>
-        <button class="btn-nav" style="margin-top: 20px; border-color: var(--danger); color: var(--danger)" onclick="app.logout()">Secure Logout</button>
+    <!-- DASHBOARD HOME -->
+    <div id="dashboard" class="section active">
+        <h1>Welcome, Analyst</h1>
+        <p>Monitor and analyze network traffic for suspicious behavior.</p>
+        <p>
+            Upload PCAP files<br>
+            Detect anomalies<br>
+            Understand threats
+        </p>
     </div>
 
-    <script>
-        // --- APPLICATION LOGIC ---
-        const app = {
-            // Navigation
-            showPage: (id) => {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(id).classList.add('active');
-                
-                // If going to dashboard, clear input for fresh start
-                if(id === 'dashboard') {
-                    document.getElementById('csvInput').value = ''; 
-                }
-            },
+    <!-- UPLOAD -->
+    <div id="upload" class="section">
+        <h2>Upload PCAP File</h2>
+        <input type="file" id="pcapFile" accept=".pcap">
+        <br>
+        <button class="main" onclick="analyzeFile()">Analyze</button>
+        <div id="result" style="margin-top:25px;"></div>
+    </div>
 
-            // --- SIMULATED LOGIN ---
-            login: () => {
-                const e = document.getElementById('email').value.trim();
-                const p = document.getElementById('password').value.trim();
-                const errBox = document.getElementById('login-error');
+    <!-- FAQ -->
+    <div id="faq" class="section">
+        <h2>Frequently Asked Questions</h2>
 
-                // Hardcoded Credentials
-                if (e === "admin" && p === "123") {
-                    app.log(User ${e} authenticated.);
-                    app.showPage('dashboard');
-                    document.getElementById('nav-buttons').innerHTML = <span style='color:white; margin-right:10px'>Welcome, Administrator</span>;
-                } else {
-                    errBox.innerText = "Access Denied: Try admin / 123";
-                    app.log("Auth failed: Invalid credentials.");
-                }
-            },
+        <div class="faq">
+            <h4>What is a PCAP file?</h4>
+            <p>A PCAP file captures network packets for traffic analysis.</p>
+        </div>
 
-            logout: () => {
-                location.reload();
-            },
+        <div class="faq">
+            <h4>Is this real analysis?</h4>
+            <p>This is a frontend demo for academic and hackathon use.</p>
+        </div>
+    </div>
 
-            // Terminal Helper
-            log: (msg) => {
-                const term = document.getElementById('terminal');
-                if(!term) return;
-                const time = new Date().toLocaleTimeString();
-                term.innerHTML += > [${time}] ${msg}<br>;
-                term.scrollTop = term.scrollHeight;
-            },
+</div>
+</div>
 
-            // --- COMPLEX ANALYSIS (REGEX & CHARTS) ---
-            processFile: () => {
-                const fileInput = document.getElementById('csvInput');
-                const file = fileInput.files[0];
-                if (!file) return;
+<script>
+/* Demo Credentials */
+const USERNAME = "admin";
+const PASSWORD = "admin123";
 
-                app.log(Reading ${file.name} (${file.size} bytes)...);
-                
-                const reader = new FileReader();
-                reader.onload = (e) => app.analyzeData(e.target.result);
-                reader.readAsText(file);
-            },
+/* Login */
+function login() {
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
 
-            analyzeData: (csvText) => {
-                app.log("Parsing packet headers...");
-                
-                // Simulate processing delay
-                setTimeout(() => {
-                    const lines = csvText.split('\n');
-                    
-                    // DATA STORE
-                    let stats = { safe: 0, sqlInjection: 0, badIP: 0, malware: 0 };
-                    let total = 0;
+    if (u === USERNAME && p === PASSWORD) {
+        document.getElementById("login").classList.remove("active");
+        document.getElementById("app").classList.add("active");
+    } else {
+        document.getElementById("loginError").innerText = "Invalid username or password";
+    }
+}
 
-                    // REGEX PATTERNS (The "Complex" Part)
-                    // Checks for SQL injection patterns like ' OR 1=1
-                    const regexSQL = /(\%27)|(\')|(\-\-)|(\%23)|(#)|(DROP TABLE)|(UNION SELECT)/i;
-                    // Checks for XSS scripting tags
-                    const regexXSS = /(<script>)|(javascript:)|(onerror=)/i;
+/* Navigation */
+function showSection(id) {
+    document.querySelectorAll('#app .section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
 
-                    lines.forEach((line, index) => {
-                        if(line.length < 5) return; // Skip empty lines
-                        total++;
-                        let isSafe = true;
+/* Logout */
+function logout() {
+    document.getElementById("app").classList.remove("active");
+    document.getElementById("login").classList.add("active");
+}
 
-                        // 1. Check SQL Injection
-                        if (regexSQL.test(line)) {
-                            stats.sqlInjection++;
-                            isSafe = false;
-                            app.log(⚠️ Packet #${index}: SQL Injection detected);
-                        }
-                        // 2. Check XSS/Malware
-                        else if (regexXSS.test(line) || line.toLowerCase().includes('malware')) {
-                            stats.malware++;
-                            isSafe = false;
-                            app.log(⚠️ Packet #${index}: Malicious Payload (XSS/Malware));
-                        }
-                        // 3. Check IP Format (Simplified logic for demo)
-                        // Marks 192.168.66.x as a "Blacklisted Subnet"
-                        else if (line.includes('192.168.66')) {
-                            stats.badIP++;
-                            isSafe = false;
-                            app.log(⚠️ Packet #${index}: Blacklisted Subnet);
-                        }
+/* Dummy Analysis */
+function analyzeFile() {
+    const fileInput = document.getElementById('pcapFile');
+    if (fileInput.files.length === 0) {
+        alert("Please upload a PCAP file.");
+        return;
+    }
 
-                        if (isSafe) stats.safe++;
-                    });
+    const fileName = fileInput.files[0].name;
+    let html = `<h3>Analysis Result</h3>`;
+    html += `<p>File: <b>${fileName}</b></p><ul>`;
 
-                    app.log(Scan Complete. Processed ${total} packets.);
-                    app.renderChart(stats);
-                }, 800); // 0.8s fake loading time
-            },
+    const packets = Math.floor(Math.random() * 40) + 15;
+    let anomalies = 0;
 
-            // CHART.JS RENDERING
-            renderChart: (stats) => {
-                const ctx = document.getElementById('securityChart').getContext('2d');
-                
-                // Destroy previous chart if exists
-                if(window.myChart) window.myChart.destroy();
+    for (let i = 1; i <= packets; i++) {
+        if (Math.random() < 0.12) {
+            html += `<li style="color:#ff4d4d;">Anomaly detected at packet ${i}</li>`;
+            anomalies++;
+        }
+    }
 
-                window.myChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Safe Traffic', 'SQL Injection', 'Bad IPs', 'Malware'],
-                        datasets: [{
-                            data: [stats.safe, stats.sqlInjection, stats.badIP, stats.malware],
-                            backgroundColor: ['#00ff88', '#ff9f43', '#ff0055', '#5f27cd'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: 'white' } },
-                            title: { display: true, text: 'Threat Distribution Analysis', color: 'white' }
-                        }
-                    }
-                });
-            }
-        };
-    </script>
+    if (anomalies === 0) {
+        html += `<li style="color:#00ff9c;">No anomalies detected</li>`;
+    }
+
+    html += `</ul>`;
+    document.getElementById('result').innerHTML = html;
+}
+</script>
+
 </body>
 </html>
