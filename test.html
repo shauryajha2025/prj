@@ -36,6 +36,10 @@ body{
     text-decoration:none;
     padding:8px 14px;
     border-radius:6px;
+    pointer-events: none; /* disabled before login */
+}
+.navbar .menu a.enabled{
+    pointer-events: auto;
 }
 .navbar .menu a:hover{
     background:#fff;
@@ -112,11 +116,11 @@ ul{margin-left:20px}
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
     <div class="menu">
-        <a href="#" onclick="showPage('dashboard')">Dashboard</a>
-        <a href="#" onclick="showPage('uploadPage')">Upload</a>
-        <a href="#" onclick="showPage('resultPage')">Results</a>
-        <a href="#" onclick="showPage('about')">About</a>
-        <a href="#" onclick="showPage('login')">Logout</a>
+        <a href="#" id="menuDashboard" class="" onclick="showPage('dashboard')">Dashboard</a>
+        <a href="#" id="menuUpload" class="" onclick="showPage('uploadPage')">Upload</a>
+        <a href="#" id="menuResults" class="" onclick="showPage('resultPage')">Results</a>
+        <a href="#" id="menuAbout" class="" onclick="showPage('about')">About</a>
+        <a href="#" id="menuLogout" class="" onclick="logout()">Logout</a>
     </div>
 </div>
 
@@ -125,47 +129,4 @@ ul{margin-left:20px}
 <!-- Login -->
 <div id="login" class="card">
     <h2>Login</h2>
-    <input type="text" placeholder="Username">
-    <input type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-</div>
-
-<!-- Dashboard -->
-<div id="dashboard" class="card hidden">
-    <h2>System Overview</h2>
-    <p>
-        PCAPIFY analyzes <b>PCAP (Packet Capture)</b> files to identify
-        anomalous or suspicious network traffic.
-    </p>
-    <ul>
-        <li>Abnormal traffic detection</li>
-        <li>Intrusion attempt identification</li>
-        <li>Network security visibility</li>
-    </ul>
-</div>
-
-<!-- Upload -->
-<div id="uploadPage" class="card hidden">
-    <h2>Upload PCAP File</h2>
-    <input type="file" id="pcapFile" accept=".pcap">
-    <button onclick="analyzeFile()">Analyze</button>
-    <p id="fileError" class="error hidden">Please select a PCAP file</p>
-</div>
-
-<!-- Results -->
-<div id="resultPage" class="card hidden">
-    <h2>Analysis Results</h2>
-    <p><b>File:</b> <span id="resultFileName"></span></p>
-
-    <ul id="anomalyList"></ul>
-
-    <h3>Traffic Anomaly Graph</h3>
-    <canvas id="graph" height="250"></canvas>
-</div>
-
-<!-- About -->
-<div id="about" class="card hidden">
-    <h2>About PCAPIFY</h2>
-    <p>
-        PCAPIFY is a cybersecurity analysis tool for detecting suspicious
-        patterns in ne
+    <input type="text"
