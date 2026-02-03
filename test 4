@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
 
-<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -17,7 +16,7 @@ body{
     color:#fff;
 }
 
-/* ===== Navbar ===== */
+/* Navbar */
 .navbar{
     height:60px;
     background:#000;
@@ -37,7 +36,7 @@ body{
 }
 .menu a:hover{background:#fff;color:#000}
 
-/* ===== Layout ===== */
+/* Layout */
 .main{padding:30px}
 .card{
     max-width:900px;
@@ -61,13 +60,18 @@ button{background:#fff;color:#000;font-weight:bold;cursor:pointer}
 button:hover{background:#ccc}
 
 .error{color:#ff2b2b;font-weight:bold}
-canvas{margin-top:20px}
+
+/* ⭐ CRITICAL FIX */
+canvas{
+    margin-top:20px;
+    width:100% !important;
+    height:350px !important;
+}
 </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
     <div class="menu hidden" id="menu">
@@ -80,7 +84,6 @@ canvas{margin-top:20px}
 
 <div class="main">
 
-<!-- Login -->
 <div id="login" class="card">
     <h2>Login</h2>
     <input id="user" placeholder="Username">
@@ -89,14 +92,12 @@ canvas{margin-top:20px}
     <p id="loginErr" class="error hidden">Invalid credentials</p>
 </div>
 
-<!-- Dashboard -->
 <div id="dashboard" class="card hidden">
     <h2>Dashboard</h2>
     <p>PCAP file anomaly analysis system</p>
     <p><b>Total Logins:</b> <span id="count">0</span></p>
 </div>
 
-<!-- Upload -->
 <div id="upload" class="card hidden">
     <h2>Upload PCAP</h2>
     <input type="file" id="pcap">
@@ -104,7 +105,6 @@ canvas{margin-top:20px}
     <p id="fileErr" class="error hidden">Select a file</p>
 </div>
 
-<!-- Results -->
 <div id="results" class="card hidden">
     <h2>Results</h2>
     <ul id="list"></ul>
@@ -130,8 +130,7 @@ function login(){
     if(user.value==="admin" && pass.value==="admin"){
         menu.classList.remove('hidden');
 
-        let c = localStorage.getItem("loginCount") || 0;
-        c++;
+        let c = Number(localStorage.getItem("loginCount") || 0) + 1;
         localStorage.setItem("loginCount",c);
         count.innerText = c;
 
@@ -171,12 +170,13 @@ function analyze(){
     setTimeout(()=>{
         drawLine(data);
         drawPie(high,normal);
-    },100);
+    },150);
 }
 
 function drawLine(data){
     if(lineChart) lineChart.destroy();
-    lineChart=new Chart(lineChartCanvas.getContext("2d"),{
+
+    lineChart = new Chart(lineChartCanvas,{
         type:"line",
         data:{
             labels:data.map((_,i)=>"Pkt "+(i+1)),
@@ -186,10 +186,12 @@ function drawLine(data){
                 borderColor:"#00e6ff",
                 backgroundColor:"rgba(0,230,255,.2)",
                 tension:.4,
-                pointRadius:6
+                pointRadius:5
             }]
         },
         options:{
+            responsive:true,
+            maintainAspectRatio:false,
             scales:{
                 x:{ticks:{color:"#fff"}},
                 y:{ticks:{color:"#fff"},beginAtZero:true,max:10}
@@ -201,7 +203,8 @@ function drawLine(data){
 
 function drawPie(a,n){
     if(pieChart) pieChart.destroy();
-    pieChart=new Chart(pieChartCanvas.getContext("2d"),{
+
+    pieChart = new Chart(pieChartCanvas,{
         type:"pie",
         data:{
             labels:["High","Normal"],
@@ -210,11 +213,14 @@ function drawPie(a,n){
                 backgroundColor:["#ff2b2b","#00e6ff"]
             }]
         },
-        options:{plugins:{legend:{labels:{color:"#fff"}}}}
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{labels:{color:"#fff"}}}
+        }
     });
 }
 
-// aliases
 const user=document.getElementById("user");
 const pass=document.getElementById("pass");
 const menu=document.getElementById("menu");
