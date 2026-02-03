@@ -4,16 +4,21 @@
 <meta charset="UTF-8">
 <title>PCAP Anomaly Analyzer</title>
 <style>
-body { font-family: Arial; background: #f4f4f9; margin:0; padding:0; }
-.container { max-width: 500px; margin: 50px auto; padding: 30px; background:white; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center; }
-h1,h2 { color:#333; }
-input, select { width: 80%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
-button, .btn { background:#4CAF50; color:white; padding:10px 25px; margin:10px 0; border:none; border-radius:5px; cursor:pointer; }
-button:hover, .btn:hover { background:#45a049; }
-a { color:#4CAF50; text-decoration:none; }
-a:hover { text-decoration:underline; }
-.hidden { display:none; }
-ul { text-align:left; }
+body { font-family: 'Segoe UI', Arial; background: #eef2f7; margin:0; padding:0; }
+.container { max-width: 500px; margin: 50px auto; padding: 30px; background:white; border-radius:10px; box-shadow:0 5px 20px rgba(0,0,0,0.2); text-align:center; transition: all 0.5s ease; }
+h1,h2 { color:#333; margin-bottom:20px; }
+input { width: 80%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #ccc; transition: 0.3s; }
+input:focus { border-color:#4CAF50; box-shadow:0 0 5px #4CAF50; outline:none; }
+button, .btn { background:#4CAF50; color:white; padding:12px 25px; margin:15px 0; border:none; border-radius:8px; cursor:pointer; transition: 0.3s; font-size:16px; }
+button:hover, .btn:hover { background:#45a049; transform: scale(1.05); }
+a { color:#4CAF50; text-decoration:none; transition:0.2s; }
+a:hover { text-decoration:underline; color:#388e3c; }
+.hidden { display:none; opacity:0; transition: opacity 0.5s ease; }
+.show { display:block; opacity:1; }
+ul { text-align:left; padding-left:20px; }
+li.anomaly { color: red; font-weight:bold; }
+#fileNamePreview { margin-top: 10px; font-style: italic; color:#555; }
+.message { color:red; font-size:14px; height:18px; }
 </style>
 </head>
 <body>
@@ -21,7 +26,7 @@ ul { text-align:left; }
 <div class="container">
 
 <!-- Home Page -->
-<div id="home">
+<div id="home" class="show">
     <h1>Welcome to PCAP Anomaly Analyzer</h1>
     <p>Analyze your network traffic for anomalies.</p>
     <div class="buttons">
@@ -35,6 +40,7 @@ ul { text-align:left; }
     <h2>User Login</h2>
     <input type="text" id="userUsername" placeholder="Username"><br>
     <input type="password" id="userPassword" placeholder="Password"><br>
+    <div class="message" id="userLoginMsg"></div>
     <button onclick="loginUser()">Login</button><br>
     <a href="#" onclick="showPage('home')">Back to Home</a>
 </div>
@@ -44,6 +50,7 @@ ul { text-align:left; }
     <h2>Admin Login</h2>
     <input type="text" id="adminUsername" placeholder="Username"><br>
     <input type="password" id="adminPassword" placeholder="Password"><br>
+    <div class="message" id="adminLoginMsg"></div>
     <button onclick="loginAdmin()">Login</button><br>
     <a href="#" onclick="showPage('home')">Back to Home</a>
 </div>
@@ -51,7 +58,8 @@ ul { text-align:left; }
 <!-- Upload Page -->
 <div id="uploadPage" class="hidden">
     <h2>Upload PCAP File</h2>
-    <input type="file" id="pcapFile" accept=".pcap"><br>
+    <input type="file" id="pcapFile" accept=".pcap" onchange="previewFile()"><br>
+    <div id="fileNamePreview"></div>
     <button onclick="analyzeFile()">Analyze</button><br>
     <a href="#" onclick="showPage('home')">Back to Home</a>
 </div>
@@ -69,72 +77,83 @@ ul { text-align:left; }
 </div>
 
 <script>
-// Page navigation
+// Smooth page transition
 function showPage(pageId){
     const pages = ['home','userLogin','adminLogin','uploadPage','resultPage'];
-    pages.forEach(p => document.getElementById(p).classList.add('hidden'));
-    document.getElementById(pageId).classList.remove('hidden');
+    pages.forEach(p => {
+        document.getElementById(p).classList.remove('show');
+        document.getElementById(p).classList.add('hidden');
+    });
+    setTimeout(()=> {
+        document.getElementById(pageId).classList.remove('hidden');
+        document.getElementById(pageId).classList.add('show');
+    }, 100);
 }
 
-// Dummy user login
+// File preview
+function previewFile(){
+    const fileInput = document.getElementById('pcapFile');
+    if(fileInput.files.length>0){
+        document.getElementById('fileNamePreview').innerText = "Selected: " + fileInput.files[0].name;
+    } else {
+        document.getElementById('fileNamePreview').innerText = "";
+    }
+}
+
+// User login validation
 function loginUser(){
-    const user = document.getElementById('userUsername').value;
-    const pass = document.getElementById('userPassword').value;
-    if(user === "user" && pass === "password"){
-        alert("User login successful!");
-        showPage('uploadPage');
-    } else {
-        alert("Invalid user credentials!");
-    }
+    const user = document.getElementById('userUsername').value.trim();
+    const pass = document.getElementById('userPassword').value.trim();
+    const msg = document.getElementById('userLoginMsg');
+    if(user==='' || pass===''){ msg.innerText="Please enter both fields"; return; }
+    if(user==='user' && pass==='password'){
+        msg.style.color='green';
+        msg.innerText="Login successful!";
+        setTimeout(()=> showPage('uploadPage'), 500);
+    } else { msg.style.color='red'; msg.innerText="Invalid credentials"; }
 }
 
-// Dummy admin login
+// Admin login validation
 function loginAdmin(){
-    const user = document.getElementById('adminUsername').value;
-    const pass = document.getElementById('adminPassword').value;
-    if(user === "admin" && pass === "admin123"){
-        alert("Admin login successful!");
-        alert("Admin Dashboard - Here you can expand functionality");
-        showPage('home');
-    } else {
-        alert("Invalid admin credentials!");
-    }
+    const user = document.getElementById('adminUsername').value.trim();
+    const pass = document.getElementById('adminPassword').value.trim();
+    const msg = document.getElementById('adminLoginMsg');
+    if(user==='' || pass===''){ msg.innerText="Please enter both fields"; return; }
+    if(user==='admin' && pass==='admin123'){
+        msg.style.color='green';
+        msg.innerText="Login successful!";
+        setTimeout(()=> { alert("Admin Dashboard (expandable)"); showPage('home'); }, 500);
+    } else { msg.style.color='red'; msg.innerText="Invalid credentials"; }
 }
 
-// Dummy anomaly detection
+// Simulated anomaly detection
 function analyzeFile(){
     const fileInput = document.getElementById('pcapFile');
-    if(fileInput.files.length === 0){
-        alert("Please select a file.");
-        return;
-    }
+    if(fileInput.files.length===0){ alert("Select a file"); return; }
+
     const fileName = fileInput.files[0].name;
     document.getElementById('resultFileName').innerText = fileName;
 
     // Simulate anomalies
     const anomalies = [];
     const totalPackets = Math.floor(Math.random()*50)+10;
-    for(let i=0; i<totalPackets; i++){
+    for(let i=0;i<totalPackets;i++){
         if(Math.random()<0.1) anomalies.push(i+1);
     }
 
     const list = document.getElementById('anomalyList');
-    list.innerHTML = "";
-    if(anomalies.length === 0){
-        list.innerHTML = "<li>No anomalies detected</li>";
-    } else {
-        anomalies.forEach(a => {
-            const li = document.createElement('li');
-            li.innerText = "Packet " + a;
-            list.appendChild(li);
-        });
-    }
+    list.innerHTML = '';
+    if(anomalies.length===0) list.innerHTML="<li>No anomalies detected</li>";
+    else anomalies.forEach(a=>{
+        const li = document.createElement('li');
+        li.innerText="Packet "+a;
+        li.classList.add('anomaly');
+        list.appendChild(li);
+    });
 
     showPage('resultPage');
 }
-
 </script>
 
 </body>
 </html>
-
