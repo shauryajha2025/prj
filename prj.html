@@ -9,8 +9,8 @@
 body{
     margin:0;
     font-family: "Segoe UI", Arial;
-    background: radial-gradient(circle at top, #0f2027, #000);
-    color:#e0e0e0;
+    background: radial-gradient(circle at top, #021b0f, #000);
+    color:#caffca;
 }
 
 /* Layout */
@@ -22,25 +22,25 @@ body{
 /* Sidebar */
 .sidebar{
     width:240px;
-    background:#020d14;
+    background:#010b06;
     padding:20px;
-    border-right:1px solid #0f3d4c;
+    border-right:1px solid #00ff88;
 }
 .sidebar h2{
-    color:#00e6ff;
+    color:#00ff88;
     text-align:center;
     margin-bottom:30px;
 }
 .sidebar a{
     display:block;
-    color:#ccc;
+    color:#bfffd9;
     padding:12px;
     margin:8px 0;
     text-decoration:none;
     border-radius:6px;
 }
 .sidebar a:hover{
-    background:#00e6ff;
+    background:#00ff88;
     color:#000;
 }
 
@@ -52,147 +52,44 @@ body{
 
 /* Cards */
 .card{
-    background:#071821;
+    background:#03140c;
     padding:20px;
-    border-radius:10px;
+    border-radius:12px;
     margin-bottom:20px;
-    box-shadow:0 0 15px rgba(0,255,255,0.1);
+    box-shadow:0 0 20px rgba(0,255,136,0.15);
 }
 .card h2{
-    color:#00e6ff;
+    color:#00ff88;
 }
 
 /* Buttons */
 button{
-    background:#00e6ff;
+    background:#00ff88;
     color:#000;
     border:none;
     padding:10px 25px;
     border-radius:6px;
     cursor:pointer;
+    font-weight:bold;
 }
-button:hover{background:#00bcd4}
+button:hover{background:#00cc6a}
 
 /* Inputs */
 input[type=text], input[type=password], input[type=file]{
     width:100%;
     padding:10px;
     margin:10px 0;
-    background:#020d14;
-    color:white;
-    border:1px solid #00e6ff;
+    background:#010b06;
+    color:#00ff88;
+    border:1px solid #00ff88;
     border-radius:6px;
 }
 
-/* Hide pages */
-.hidden{display:none}
-ul{margin-left:20px}
-</style>
-</head>
-
-<body>
-
-<div class="wrapper">
-
-<!-- Sidebar -->
-<div class="sidebar">
-    <h2>🔐 PCAP Analyzer</h2>
-    <a href="#" onclick="showPage('dashboard')">Dashboard</a>
-    <a href="#" onclick="showPage('uploadPage')">Upload PCAP</a>
-    <a href="#" onclick="showPage('resultPage')">Results</a>
-    <a href="#" onclick="showPage('about')">About</a>
-    <a href="#" onclick="showPage('login')">Logout</a>
-</div>
-
-<!-- Main Area -->
-<div class="main">
-
-<!-- Login -->
-<div id="login" class="card">
-    <h2>Login</h2>
-    <input type="text" id="user" placeholder="Username">
-    <input type="password" id="pass" placeholder="Password">
-    <button onclick="login()">Login</button>
-</div>
-
-<!-- Dashboard -->
-<div id="dashboard" class="card hidden">
-    <h2>Cyber Security Dashboard</h2>
-    <p>
-        This dashboard analyzes <b>PCAP (Packet Capture)</b> files to detect
-        suspicious or anomalous network behavior.
-    </p>
-    <ul>
-        <li>✔ Detect abnormal packet patterns</li>
-        <li>✔ Identify possible intrusion attempts</li>
-        <li>✔ Improve network security visibility</li>
-    </ul>
-</div>
-
-<!-- Upload -->
-<div id="uploadPage" class="card hidden">
-    <h2>Upload PCAP File</h2>
-    <input type="file" id="pcapFile" accept=".pcap">
-    <button onclick="analyzeFile()">Analyze</button>
-</div>
-
-<!-- Results -->
-<div id="resultPage" class="card hidden">
-    <h2>Analysis Results</h2>
-    <p>File: <span id="resultFileName"></span></p>
-    <ul id="anomalyList"></ul>
-</div>
-
-<!-- About -->
-<div id="about" class="card hidden">
-    <h2>About the System</h2>
-    <p>
-        <b>PCAP Anomaly Analyzer</b> is a cyber security tool that inspects
-        captured network packets to identify unusual traffic patterns.
-    </p>
-    <p>
-        Such systems are used in:
-    </p>
-    <ul>
-        <li>Intrusion Detection Systems (IDS)</li>
-        <li>Network Forensics</li>
-        <li>Security Operations Centers (SOC)</li>
-    </ul>
-</div>
-
-</div>
-</div>
-
-<script>
-function showPage(id){
-    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-}
-
-function login(){
-    showPage('dashboard');
-}
-
-function analyzeFile(){
-    const file = document.getElementById('pcapFile').files[0];
-    if(!file){alert("Select a PCAP file");return;}
-    document.getElementById('resultFileName').innerText=file.name;
-
-    const list=document.getElementById('anomalyList');
-    list.innerHTML="";
-    let found=false;
-    for(let i=1;i<=20;i++){
-        if(Math.random()<0.15){
-            found=true;
-            let li=document.createElement('li');
-            li.innerText="Suspicious activity detected at packet "+i;
-            list.appendChild(li);
-        }
-    }
-    if(!found) list.innerHTML="<li>No anomalies detected</li>";
-    showPage('resultPage');
-}
-</script>
-
-</body>
-</html>
+/* Threat style */
+.threat{
+    background:#140303;
+    color:#ff4d4d;
+    margin:10px 0;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #
