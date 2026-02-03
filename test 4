@@ -1,42 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PCAPIFY</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:"Segoe UI", Arial;
+    background:#000;
+    color:#fff;
+}
+
+.navbar{
+    height:60px;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    border-bottom:1px solid #444;
+}
+.logo{
+    font-size:20px;
+    font-weight:bold;
+}
+.menu a{
+    color:#ccc;
+    margin-left:20px;
+    text-decoration:none;
+    padding:8px 14px;
+    border-radius:6px;
+}
+.menu a:hover{
+    background:#fff;
+    color:#000;
+}
+
+.main{padding:30px}
+
+.card{
+    max-width:900px;
+    margin:auto;
+    background:#111;
+    padding:25px;
+    border-radius:10px;
+    border:1px solid #333;
+    margin-bottom:30px;
+}
+
+input,button{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border-radius:6px;
+}
+input{
+    background:#000;
+    color:#fff;
+    border:1px solid #fff;
+}
+button{
+    background:#fff;
+    color:#000;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.error{color:#ff2b2b;font-weight:bold}
+.hidden{display:none}
+
+canvas{
+    width:100%;
+    background:#000;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">PCAPIFY</div>
+    <div class="menu hidden" id="menu">
+        <a onclick="showPage('dashboard')">Dashboard</a>
+        <a onclick="showPage('upload')">Upload</a>
+        <a onclick="showPage('results')">Results</a>
+        <a onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="main">
+
+<!-- LOGIN -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="loginErr" class="error hidden">Invalid Credentials</p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="card hidden">
+    <h2>System Overview</h2>
+    <p>PCAPIFY detects suspicious traffic in PCAP files.</p>
+    <p>Total Logins: <b id="count">0</b></p>
+</div>
+
+<!-- UPLOAD -->
+<div id="upload" class="card hidden">
+    <h2>Upload PCAP</h2>
+    <input type="file" id="pcap" accept=".pcap">
+    <button onclick="analyze()">Analyze</button>
+    <p id="fileErr" class="error hidden">Select a PCAP file</p>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="card hidden">
+    <h2>Results</h2>
+    <p><b>File:</b> <span id="fname"></span></p>
+    <ul id="list"></ul>
+
+    <h3>Anomaly Line Graph</h3>
+    <canvas id="line"></canvas>
+
+    <h3>Anomaly Distribution</h3>
+    <canvas id="pie"></canvas>
+</div>
+
+</div>
+
 <script>
-function analyzeFile(){
-    const file=document.getElementById('pcapFile').files[0];
-    const error=document.getElementById('fileError');
-    error.classList.add('hidden');
+let lineChart, pieChart;
 
-    if(!file){
-        error.classList.remove('hidden');
-        return;
-    }
+function showPage(id){
+    document.querySelectorAll('.card').forEach(d=>d.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
 
-    // 👉 SHOW RESULTS PAGE FIRST
-    showPage('resultPage');
+function login(){
+    if(user.value==="admin" && pass.value==="admin"){
+        loginErr.classList.add('hidden');
+        menu.classList.remove('hidden');
+        let c=localStorage.getItem("cnt")||0;
+        c++;
+        localStorage.setItem("cnt",c);
+        count.innerText=c;
+        showPage('dashboard');
+    } else loginErr.classList.remove('hidden');
+}
 
-    document.getElementById('resultFileName').innerText=file.name;
-    const list=document.getElementById('anomalyList');
-    list.innerHTML="";
+function logout(){
+    menu.classList.add('hidden');
+    showPage('login');
+}
 
-    let data=[];
-    let anomalies=0;
-    let normal=0;
+function analyze(){
+    const f=pcap.files[0];
+    if(!f){fileErr.classList.remove('hidden');return;}
+    fileErr.classList.add('hidden');
 
-    for(let i=1;i<=20;i++){
-        let score=Math.floor(Math.random()*10);
-        data.push(score);
-        if(score>6){
-            anomalies++;
-            let li=document.createElement('li');
-            li.innerHTML="<span class='error'>High anomaly score</span> at packet "+i;
-            list.appendChild(li);
-        } else {
-            normal++;
+    showPage('results');
+
+    setTimeout(()=>{
+        fname.innerText=f.name;
+        list.innerHTML="";
+        let data=[],a=0,n=0;
+
+        for(let i=1;i<=20;i++){
+            let s=Math.floor(Math.random()*10);
+            data.push(s);
+            if(s>6){
+                a++;
+                list.innerHTML+=`<li class="error">High anomaly at packet ${i}</li>`;
+            } else n++;
         }
-    }
 
-    if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
+        drawLine(data);
+        drawPie(a,n);
+    },100);
+}
 
-    // 👉 DRAW CHARTS AFTER PAGE IS VISIBLE
-    drawLineGraph(data);
-    drawPieChart(anomalies, normal);
+function drawLine(data){
+    if(lineChart) lineChart.destroy();
+    lineChart=new Chart(line,{
+        type:"line",
+        data:{
+            labels:data.map((_,i)=>"Pkt "+(i+1)),
+            datasets:[{
+                data:data,
+                borderColor:"#00e6ff",
+                fill:true,
+                backgroundColor:"rgba(0,230,255,0.2)",
+                pointBackgroundColor:data.map(v=>v>6?"#ff2b2b":"#fff")
+            }]
+        },
+        options:{scales:{y:{beginAtZero:true,max:10}}}
+    });
+}
+
+function drawPie(a,n){
+    if(pieChart) pieChart.destroy();
+    pieChart=new Chart(pie,{
+        type:"pie",
+        data:{
+            labels:["Anomaly","Normal"],
+            datasets:[{data:[a,n],backgroundColor:["#ff2b2b","#00e6ff"]}]
+        }
+    });
 }
 </script>
+
+</body>
+</html>
