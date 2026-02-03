@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
 
-<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -17,7 +16,7 @@ body{
     color:#fff;
 }
 
-/* ===== Top Navbar ===== */
+/* ===== Navbar ===== */
 .navbar{
     height:60px;
     background:#000;
@@ -27,9 +26,158 @@ body{
     padding:0 30px;
     border-bottom:1px solid #444;
 }
-.navbar .logo{
-    color:#fff;
+.logo{
     font-size:20px;
     font-weight:bold;
     letter-spacing:2px;
 }
+.menu a{
+    color:#ccc;
+    margin-left:20px;
+    text-decoration:none;
+    padding:8px 14px;
+    border-radius:6px;
+}
+.menu a:hover{
+    background:#fff;
+    color:#000;
+}
+
+/* ===== Main ===== */
+.main{
+    padding:30px;
+}
+
+/* ===== Card ===== */
+.card{
+    max-width:420px;
+    margin:80px auto;
+    background:#111;
+    padding:30px;
+    border-radius:14px;
+    border:1px solid #333;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transform-style: preserve-3d;
+}
+.card h2{
+    text-align:center;
+}
+
+/* ===== Inputs ===== */
+input{
+    width:100%;
+    margin:12px 0;
+    padding:12px;
+    background:#000;
+    color:#fff;
+    border:1px solid #fff;
+    border-radius:6px;
+}
+button{
+    width:100%;
+    margin-top:10px;
+    padding:12px;
+    background:#fff;
+    color:#000;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+}
+button:hover{
+    background:#ccc;
+}
+
+.error{
+    color:#ff2b2b;
+    font-weight:bold;
+    text-align:center;
+}
+
+/* ===== Utilities ===== */
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">PCAPIFY</div>
+    <div class="menu hidden" id="mainMenu">
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="main">
+
+<!-- ===== Login ===== -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="loginError" class="error hidden">Invalid username or password</p>
+</div>
+
+</div>
+
+<script>
+/* ===== 3D Cursor Tilt Effect ===== */
+const loginCard = document.getElementById("login");
+
+loginCard.addEventListener("mousemove", (e) => {
+    const rect = loginCard.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = -(y - centerY) / 12;
+    const rotateY = (x - centerX) / 12;
+
+    loginCard.style.transform = `
+        perspective(1000px)
+        scale(1.06)
+        rotateX(${rotateX}deg)
+        rotateY(${rotateY}deg)
+    `;
+
+    loginCard.style.boxShadow = `
+        0 30px 60px rgba(0,0,0,0.9),
+        0 0 35px rgba(255,255,255,0.15)
+    `;
+});
+
+loginCard.addEventListener("mouseleave", () => {
+    loginCard.style.transform = `
+        perspective(1000px)
+        scale(1)
+        rotateX(0deg)
+        rotateY(0deg)
+    `;
+    loginCard.style.boxShadow = `0 15px 30px rgba(0,0,0,0.7)`;
+});
+
+/* ===== Login Logic ===== */
+function login(){
+    const user=document.getElementById('username').value;
+    const pass=document.getElementById('password').value;
+    const error=document.getElementById('loginError');
+
+    if(user==="admin" && pass==="admin"){
+        error.classList.add('hidden');
+        document.getElementById('mainMenu').classList.remove('hidden');
+        alert("Login Successful");
+    }else{
+        error.classList.remove('hidden');
+    }
+}
+
+function logout(){
+    document.getElementById('mainMenu').classList.add('hidden');
+}
+</script>
+
+</body>
+</html>
