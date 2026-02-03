@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>PCAP Anomaly Analyzer</title>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 /* ===== CYBER THEME ===== */
 body {
@@ -22,13 +25,11 @@ body {
     padding: 30px;
 }
 
-/* Headings */
 h1, h2, h3 {
     color: #00ff9c;
     text-shadow: 0 0 10px rgba(0,255,150,0.4);
 }
 
-/* Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -36,7 +37,6 @@ h1, h2, h3 {
     margin-bottom: 25px;
 }
 
-/* Buttons */
 button {
     background: transparent;
     border: 1px solid #00ff9c;
@@ -58,7 +58,6 @@ button.main {
     font-weight: bold;
 }
 
-/* Inputs */
 input {
     width: 80%;
     padding: 12px;
@@ -69,7 +68,6 @@ input {
     border-radius: 8px;
 }
 
-/* Sections */
 .section {
     display: none;
     margin-top: 30px;
@@ -79,25 +77,12 @@ input {
     display: block;
 }
 
-/* FAQ */
 .faq {
     background: #081316;
     padding: 15px;
     border-left: 3px solid #00ff9c;
     margin-bottom: 15px;
     border-radius: 8px;
-}
-
-.faq h4 {
-    margin: 0;
-    color: #00ff9c;
-}
-
-ul {
-    text-align: left;
-}
-li {
-    margin: 6px 0;
 }
 </style>
 </head>
@@ -106,10 +91,10 @@ li {
 
 <div class="container">
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN -->
 <div id="login" class="section active">
     <h1>Secure Login</h1>
-    <p>Enter your credentials to access the PCAP Analyzer</p>
+    <p>Enter your credentials</p>
 
     <input type="text" id="username" placeholder="Username">
     <input type="password" id="password" placeholder="Password">
@@ -119,7 +104,7 @@ li {
     <p id="loginError" style="color:#ff4d4d;"></p>
 </div>
 
-<!-- DASHBOARD -->
+<!-- APP -->
 <div id="app" class="section">
 
     <div class="navbar">
@@ -132,15 +117,10 @@ li {
         </div>
     </div>
 
-    <!-- DASHBOARD HOME -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="section active">
         <h1>Welcome, Analyst</h1>
-        <p>Monitor and analyze network traffic for suspicious behavior.</p>
-        <p>
-            Upload PCAP files<br>
-            Detect anomalies<br>
-            Understand threats
-        </p>
+        <p>Analyze network traffic and detect threats.</p>
     </div>
 
     <!-- UPLOAD -->
@@ -149,21 +129,21 @@ li {
         <input type="file" id="pcapFile" accept=".pcap">
         <br>
         <button class="main" onclick="analyzeFile()">Analyze</button>
+
         <div id="result" style="margin-top:25px;"></div>
+        <canvas id="threatChart" style="margin-top:30px;"></canvas>
     </div>
 
     <!-- FAQ -->
     <div id="faq" class="section">
-        <h2>Frequently Asked Questions</h2>
-
+        <h2>FAQ</h2>
         <div class="faq">
             <h4>What is a PCAP file?</h4>
-            <p>A PCAP file captures network packets for traffic analysis.</p>
+            <p>A file containing captured network packets.</p>
         </div>
-
         <div class="faq">
             <h4>Is this real analysis?</h4>
-            <p>This is a frontend demo for academic and hackathon use.</p>
+            <p>No, this is a frontend demo for projects/hackathons.</p>
         </div>
     </div>
 
@@ -171,9 +151,11 @@ li {
 </div>
 
 <script>
-/* Demo Credentials */
+/* Demo credentials */
 const USERNAME = "admin";
 const PASSWORD = "admin123";
+
+let threatChart;
 
 /* Login */
 function login() {
@@ -184,7 +166,7 @@ function login() {
         document.getElementById("login").classList.remove("active");
         document.getElementById("app").classList.add("active");
     } else {
-        document.getElementById("loginError").innerText = "Invalid username or password";
+        document.getElementById("loginError").innerText = "Invalid credentials";
     }
 }
 
@@ -200,36 +182,46 @@ function logout() {
     document.getElementById("login").classList.add("active");
 }
 
-/* Dummy Analysis */
+/* Analysis + Graph */
 function analyzeFile() {
     const fileInput = document.getElementById('pcapFile');
     if (fileInput.files.length === 0) {
-        alert("Please upload a PCAP file.");
+        alert("Please upload a PCAP file");
         return;
     }
 
     const fileName = fileInput.files[0].name;
-    let html = `<h3>Analysis Result</h3>`;
-    html += `<p>File: <b>${fileName}</b></p><ul>`;
 
-    const packets = Math.floor(Math.random() * 40) + 15;
-    let anomalies = 0;
+    // Dummy values
+    const threats = Math.floor(Math.random() * 10) + 5;
+    const malware = Math.floor(Math.random() * 6) + 2;
+    const normal = Math.floor(Math.random() * 25) + 10;
 
-    for (let i = 1; i <= packets; i++) {
-        if (Math.random() < 0.12) {
-            html += `<li style="color:#ff4d4d;">Anomaly detected at packet ${i}</li>`;
-            anomalies++;
-        }
-    }
+    document.getElementById('result').innerHTML = `
+        <h3>Analysis Result</h3>
+        <p><b>File:</b> ${fileName}</p>
+        <ul>
+            <li style="color:#ff4d4d;">Threats: ${threats}</li>
+            <li style="color:#ff9933;">Malware: ${malware}</li>
+            <li style="color:#00ff9c;">Normal Packets: ${normal}</li>
+        </ul>
+    `;
 
-    if (anomalies === 0) {
-        html += `<li style="color:#00ff9c;">No anomalies detected</li>`;
-    }
+    const ctx = document.getElementById('threatChart').getContext('2d');
 
-    html += `</ul>`;
-    document.getElementById('result').innerHTML = html;
-}
-</script>
+    if (threatChart) threatChart.destroy();
 
-</body>
-</html>
+    threatChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Threats', 'Malware', 'Normal'],
+            datasets: [{
+                label: 'Packet Analysis',
+                data: [threats, malware, normal],
+                backgroundColor: ['#ff4d4d', '#ff9933', '#00ff9c']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: '#e0e0e0' } },
