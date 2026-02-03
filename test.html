@@ -13,7 +13,7 @@ body{
     color:#e0e0e0;
 }
 
-/* ===== Top Navbar ===== */
+/* ===== Navbar ===== */
 .navbar{
     height:60px;
     background:#020d14;
@@ -23,27 +23,25 @@ body{
     padding:0 30px;
     border-bottom:1px solid #0f3d4c;
 }
-.navbar .logo{
+.logo{
     color:#00e6ff;
     font-size:20px;
     font-weight:bold;
 }
-.navbar .menu a{
+.menu a{
     color:#ccc;
     margin-left:20px;
     text-decoration:none;
     padding:8px 14px;
     border-radius:6px;
 }
-.navbar .menu a:hover{
+.menu a:hover{
     background:#00e6ff;
     color:#000;
 }
 
-/* ===== Main ===== */
+/* ===== Layout ===== */
 .main{padding:30px}
-
-/* ===== Cards ===== */
 .card{
     max-width:900px;
     margin:auto;
@@ -53,10 +51,10 @@ body{
     margin-bottom:30px;
     box-shadow:0 0 20px rgba(0,255,255,0.08);
 }
-.card h2{color:#00e6ff}
+h2,h3{color:#00e6ff}
 
-/* ===== Inputs & Buttons ===== */
-input, button{
+/* ===== Inputs ===== */
+input,button{
     padding:10px;
     border-radius:6px;
 }
@@ -84,9 +82,7 @@ canvas{
     margin-top:20px;
 }
 
-/* ===== Utilities ===== */
 .hidden{display:none}
-ul{margin-left:20px}
 </style>
 </head>
 
@@ -95,7 +91,6 @@ ul{margin-left:20px}
 <div class="navbar">
     <div class="logo">PCAP Anomaly Analyzer</div>
     <div class="menu">
-        <a href="#" onclick="showPage('dashboard')">Dashboard</a>
         <a href="#" onclick="showPage('uploadPage')">Upload</a>
         <a href="#" onclick="showPage('resultPage')">Results</a>
         <a href="#" onclick="showPage('about')">About</a>
@@ -105,6 +100,7 @@ ul{margin-left:20px}
 
 <div class="main">
 
+<!-- LOGIN -->
 <div id="login" class="card">
     <h2>Login</h2>
     <input type="text" placeholder="Username">
@@ -112,32 +108,30 @@ ul{margin-left:20px}
     <button onclick="login()">Login</button>
 </div>
 
-<div id="dashboard" class="card hidden">
-    <h2>System Overview</h2>
-    <p>Analyze PCAP files to detect suspicious network behavior.</p>
-</div>
-
+<!-- UPLOAD -->
 <div id="uploadPage" class="card hidden">
     <h2>Upload PCAP File</h2>
     <input type="file" id="pcapFile" accept=".pcap">
     <button onclick="analyzeFile()">Analyze</button>
 </div>
 
+<!-- RESULTS -->
 <div id="resultPage" class="card hidden">
     <h2>Analysis Results</h2>
     <p><b>File:</b> <span id="resultFileName"></span></p>
     <ul id="anomalyList"></ul>
 
-    <h3 style="color:#00e6ff">Traffic Anomaly Line Graph</h3>
-    <canvas id="graph" height="250"></canvas>
+    <h3>Traffic Anomaly Line Graph</h3>
+    <canvas id="graph" width="1200" height="450"></canvas>
 
-    <h3 style="color:#00e6ff">Anomaly Distribution (Pie Chart)</h3>
-    <canvas id="pie" height="250"></canvas>
+    <h3>Anomaly Distribution (Pie Chart)</h3>
+    <canvas id="pie" width="600" height="400"></canvas>
 </div>
 
+<!-- ABOUT -->
 <div id="about" class="card hidden">
     <h2>About</h2>
-    <p>Cybersecurity tool for PCAP analysis and anomaly detection.</p>
+    <p>PCAP Anomaly Analyzer detects suspicious network traffic patterns for cybersecurity analysis.</p>
 </div>
 
 </div>
@@ -147,8 +141,13 @@ function showPage(id){
     document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
 }
-function login(){showPage('dashboard');}
 
+/* Login → Upload */
+function login(){
+    showPage('uploadPage');
+}
+
+/* Analyze */
 function analyzeFile(){
     const file=document.getElementById('pcapFile').files[0];
     if(!file){alert("Select a PCAP file");return;}
@@ -158,56 +157,58 @@ function analyzeFile(){
     list.innerHTML="";
 
     let data=[], anomalies=0;
-    for(let i=1;i<=20;i++){
+    for(let i=1;i<=30;i++){
         let score=Math.floor(Math.random()*10);
         data.push(score);
         if(score>6){
             anomalies++;
             let li=document.createElement('li');
-            li.innerText="High anomaly at packet "+i;
+            li.innerText=`High anomaly detected at packet ${i}`;
             list.appendChild(li);
         }
     }
     if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
 
     drawGraph(data);
-    drawPie(anomalies, 20-anomalies);
+    drawPie(anomalies, data.length-anomalies);
     showPage('resultPage');
 }
 
+/* High-Def Line Graph */
 function drawGraph(data){
     const c=document.getElementById('graph');
     const ctx=c.getContext('2d');
     ctx.clearRect(0,0,c.width,c.height);
 
-    // Axes
-    ctx.strokeStyle="#888";
+    ctx.strokeStyle="#555";
     ctx.beginPath();
-    ctx.moveTo(40,10); ctx.lineTo(40,c.height-30);
-    ctx.lineTo(c.width-10,c.height-30);
+    ctx.moveTo(60,20);
+    ctx.lineTo(60,c.height-50);
+    ctx.lineTo(c.width-20,c.height-50);
     ctx.stroke();
 
-    // Labels
     ctx.fillStyle="#aaa";
-    ctx.fillText("Packets", c.width/2, c.height-10);
+    ctx.fillText("Packets →", c.width/2, c.height-20);
     ctx.save();
     ctx.rotate(-Math.PI/2);
-    ctx.fillText("Anomaly Score", -c.height/2, 15);
+    ctx.fillText("Anomaly Score", -c.height/2, 25);
     ctx.restore();
 
-    // Line
     ctx.strokeStyle="#00e6ff";
+    ctx.lineWidth=2;
     ctx.beginPath();
-    let step=(c.width-60)/(data.length-1);
+
+    let step=(c.width-100)/(data.length-1);
     data.forEach((v,i)=>{
-        let x=40+i*step;
-        let y=(c.height-30)-(v*20);
+        let x=60+i*step;
+        let y=(c.height-50)-(v*30);
         if(i===0) ctx.moveTo(x,y);
         else ctx.lineTo(x,y);
     });
     ctx.stroke();
 }
 
+/* High-Def Pie Chart */
 function drawPie(anomaly, normal){
     const c=document.getElementById('pie');
     const ctx=c.getContext('2d');
@@ -225,19 +226,19 @@ function drawPie(anomaly, normal){
         let angle=(s.val/total)*2*Math.PI;
         ctx.fillStyle=s.color;
         ctx.beginPath();
-        ctx.moveTo(125,125);
-        ctx.arc(125,125,100,start,start+angle);
+        ctx.moveTo(200,200);
+        ctx.arc(200,200,150,start,start+angle);
         ctx.fill();
         start+=angle;
     });
 
     ctx.fillStyle="#fff";
-    ctx.fillText("Normal",260,100);
-    ctx.fillText("Anomaly",260,130);
+    ctx.fillText("Normal",420,160);
+    ctx.fillText("Anomaly",420,200);
     ctx.fillStyle="#00e6ff";
-    ctx.fillRect(240,92,12,12);
+    ctx.fillRect(395,150,15,15);
     ctx.fillStyle="#ff5252";
-    ctx.fillRect(240,122,12,12);
+    ctx.fillRect(395,190,15,15);
 }
 </script>
 
