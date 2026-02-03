@@ -52,8 +52,8 @@
         <div class="card">
             <h2>Secure Access</h2>
             <p>Authenticated via Google Identity Platform</p>
-            <input type="email" id="email" placeholder="admin@company.com">
-            <input type="password" id="password" placeholder="••••••••">
+            <input type="email" id="email" placeholder="Enter your email">
+            <input type="password" id="password" placeholder="Enter your password">
             <button class="btn-action" onclick="app.login()">Authenticate</button>
             <p id="login-error" style="color:var(--danger); font-size: 0.9rem; margin-top:10px;"></p>
         </div>
@@ -84,7 +84,7 @@
         // --- 1. FIREBASE CONFIGURATION (ACTION REQUIRED) ---
         // TODO: Paste your config here from Firebase Console!
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY_HERE",
+            apiKey: "PASTE_YOUR_API_KEY_HERE",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
             projectId: "YOUR_PROJECT_ID",
             storageBucket: "YOUR_PROJECT.appspot.com",
@@ -114,8 +114,8 @@
                 const errBox = document.getElementById('login-error');
 
                 // If user didn't paste keys, show alert
-                if(firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
-                    alert("⚠️ SYSTEM ERROR: Firebase Keys Missing.\nPlease edit the HTML file and add your Firebase Config.");
+                if(firebaseConfig.apiKey === "PASTE_YOUR_API_KEY_HERE") {
+                    alert("⚠️ SYSTEM ERROR: Firebase Keys Missing.\n\nPlease edit index.html lines 106-113 and add your Firebase Config keys from the Firebase Console.");
                     return;
                 }
 
@@ -187,7 +187,6 @@
                         app.log(⚠️ Packet #${index}: Malicious Payload (XSS/Malware));
                     }
                     // 3. Check IP Format (Simplified for demo)
-                    // In a real CSV, you'd extract the specific column. Here we scan the whole line.
                     // If we find an IP starting with '192.168.66' we assume it's a "Bad Actor" subnet
                     else if (line.includes('192.168.66')) {
                         stats.badIP++;
