@@ -14,7 +14,7 @@ body{
     color:#fff;
 }
 
-/* ===== Navbar ===== */
+/* ===== Top Navbar ===== */
 .navbar{
     height:60px;
     background:#000;
@@ -24,43 +24,40 @@ body{
     padding:0 30px;
     border-bottom:1px solid #444;
 }
-.logo{
+.navbar .logo{
+    color:#fff;
     font-size:22px;
     font-weight:800;
     letter-spacing:2px;
-    text-shadow:0 0 8px rgba(255,255,255,0.4);
 }
-.menu a{
+.navbar .menu a{
     color:#ccc;
     margin-left:20px;
     text-decoration:none;
     padding:8px 14px;
     border-radius:6px;
-    pointer-events:none;
 }
-.menu a.enabled{pointer-events:auto}
-.menu a:hover{
+.navbar .menu a:hover{
     background:#fff;
     color:#000;
 }
 
 /* ===== Main ===== */
 .main{
-    padding:40px;
-    display:flex;
-    justify-content:center;
+    padding:30px;
 }
 
-/* ===== Card (3D Hover) ===== */
+/* ===== Cards ===== */
 .card{
-    max-width:420px;
-    width:100%;
+    max-width:900px;
+    margin:auto;
     background:#111;
-    padding:30px;
+    padding:25px;
     border-radius:12px;
+    margin-bottom:30px;
     border:1px solid #333;
-    transition:transform 0.4s ease, box-shadow 0.4s ease;
-    transform-style:preserve-3d;
 }
-.card:hover{
-    transform:perspective(1000px) rotateX(6deg) rotateY(-6deg
+
+/* ===== LOGIN 3D CARD ===== */
+.login-3d{
+    max-width:420
