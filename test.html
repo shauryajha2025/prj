@@ -2,259 +2,232 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PCAP Anomaly Analyzer</title>
+<title>PCAPIFY | Anomaly Detection Dashboard</title>
 
 <style>
 *{box-sizing:border-box}
+
 body{
     margin:0;
     font-family:"Segoe UI", Arial;
-    background:#0b1c24;
-    color:#e0e0e0;
+    background:radial-gradient(circle at top, #1a0000, #000);
+    color:#ffd6d6;
 }
 
-/* ===== Navbar ===== */
-.navbar{
-    height:60px;
-    background:#020d14;
+/* Layout */
+.wrapper{
     display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 30px;
-    border-bottom:1px solid #0f3d4c;
+    min-height:100vh;
 }
-.logo{
-    color:#00e6ff;
-    font-size:20px;
-    font-weight:bold;
+
+/* Sidebar */
+.sidebar{
+    width:240px;
+    background:#0b0000;
+    padding:20px;
+    border-right:1px solid #ff1a1a;
 }
-.menu a{
-    color:#ccc;
-    margin-left:20px;
+.sidebar h2{
+    color:#ff3333;
+    text-align:center;
+    margin-bottom:30px;
+    letter-spacing:1px;
+}
+.sidebar a{
+    display:block;
+    color:#ffb3b3;
+    padding:12px;
+    margin:8px 0;
     text-decoration:none;
-    padding:8px 14px;
     border-radius:6px;
 }
-.menu a:hover{
-    background:#00e6ff;
+.sidebar a:hover{
+    background:#ff1a1a;
     color:#000;
 }
 
-/* ===== Layout ===== */
-.main{padding:30px}
-.card{
-    max-width:900px;
-    margin:auto;
-    background:#071821;
-    padding:25px;
-    border-radius:10px;
-    margin-bottom:30px;
-    box-shadow:0 0 20px rgba(0,255,255,0.08);
+/* Main Content */
+.main{
+    flex:1;
+    padding:30px;
 }
-h2,h3{color:#00e6ff}
 
-/* ===== Inputs ===== */
-input,button{
-    padding:10px;
-    border-radius:6px;
+/* Cards */
+.card{
+    background:#140000;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+    box-shadow:0 0 25px rgba(255,0,0,0.25);
 }
-input{
-    width:100%;
-    margin:10px 0;
-    background:#020d14;
-    color:#fff;
-    border:1px solid #00e6ff;
+.card h2{
+    color:#ff3333;
 }
+
+/* Buttons */
 button{
-    background:#00e6ff;
+    background:#ff1a1a;
+    color:#000;
     border:none;
+    padding:10px 25px;
+    border-radius:6px;
     cursor:pointer;
     font-weight:bold;
 }
-button:hover{background:#00bcd4}
-
-/* ===== Canvas ===== */
-canvas{
-    width:100%;
-    background:#020d14;
-    border:1px solid #00e6ff;
-    border-radius:8px;
-    margin-top:20px;
+button:hover{
+    background:#cc0000;
 }
 
-.hidden{display:none}
+/* Inputs */
+input[type=text],
+input[type=password],
+input[type=file]{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    background:#0b0000;
+    color:#ff6666;
+    border:1px solid #ff1a1a;
+    border-radius:6px;
+}
+
+/* Threat style */
+.threat{
+    background:#1a0000;
+    color:#ff4d4d;
+    margin:10px 0;
+    padding:14px;
+    border-radius:10px;
+    border:1px solid #ff0000;
+    box-shadow:0 0 25px rgba(255,0,0,0.7);
+    transition:0.3s;
+}
+.threat:hover{
+    transform:scale(1.07);
+    box-shadow:0 0 45px rgba(255,0,0,1);
+}
+
+/* Pages */
+.hidden{
+    display:none;
+}
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR (hidden until login) -->
-<div class="navbar hidden" id="navbar">
-    <div class="logo">PCAP Anomaly Analyzer</div>
-    <div class="menu">
-        <a href="#" onclick="showPage('uploadPage')">Upload</a>
-        <a href="#" onclick="showPage('resultPage')">Results</a>
-        <a href="#" onclick="showPage('about')">About</a>
-        <a href="#" onclick="logout()">Logout</a>
-    </div>
+<div class="wrapper">
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>🔴 PCAPIFY</h2>
+    <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+    <a href="#" onclick="showPage('upload')">Upload PCAP</a>
+    <a href="#" onclick="showPage('results')">Threat Results</a>
+    <a href="#" onclick="showPage('about')">About PCAPIFY</a>
 </div>
 
+<!-- Main Content -->
 <div class="main">
 
-<!-- LOGIN -->
-<div id="login" class="card">
-    <h2>Login</h2>
-    <input type="text" placeholder="Username">
-    <input type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+<!-- Dashboard -->
+<div id="dashboard" class="card">
+    <h2>PCAPIFY – Cyber Threat Dashboard</h2>
+    <p>
+        <b>PCAPIFY</b> is a cyber-security analysis dashboard designed to
+        inspect <b>PCAP (Packet Capture)</b> files and identify suspicious,
+        malicious, or abnormal network behavior.
+    </p>
+    <p>
+        This interface simulates how real-world <b>Security Operations Centers (SOC)</b>
+        monitor threats in enterprise networks.
+    </p>
 </div>
 
-<!-- UPLOAD -->
-<div id="uploadPage" class="card hidden">
+<!-- Upload -->
+<div id="upload" class="card hidden">
     <h2>Upload PCAP File</h2>
     <input type="file" id="pcapFile" accept=".pcap">
-    <button onclick="analyzeFile()">Analyze</button>
+    <button onclick="analyze()">Start Analysis</button>
 </div>
 
-<!-- RESULTS -->
-<div id="resultPage" class="card hidden">
-    <h2>Analysis Results</h2>
-    <p><b>File:</b> <span id="resultFileName"></span></p>
-    <ul id="anomalyList"></ul>
-
-    <h3>Traffic Anomaly Line Graph</h3>
-    <canvas id="graph" width="1200" height="450"></canvas>
-
-    <h3>Anomaly Distribution (Pie Chart)</h3>
-    <canvas id="pie" width="600" height="400"></canvas>
+<!-- Results -->
+<div id="results" class="card hidden">
+    <h2>Detected Network Threats</h2>
+    <div id="threatList"></div>
 </div>
 
-<!-- ABOUT -->
+<!-- About -->
 <div id="about" class="card hidden">
-    <h2>About</h2>
+    <h2>About PCAPIFY</h2>
     <p>
-        PCAP Anomaly Analyzer is a cybersecurity tool used to analyze
-        packet capture files and identify suspicious traffic patterns.
+        <b>PCAPIFY</b> is a simulated <b>PCAP Anomaly Detection System</b> created
+        to demonstrate how network traffic can be analyzed for security threats.
+    </p>
+
+    <p><b>Key Features:</b></p>
+    <ul>
+        <li>🔍 Analysis of packet-level network data</li>
+        <li>🚨 Detection of suspicious and anomalous traffic patterns</li>
+        <li>🛡️ Simulation of intrusion detection systems (IDS)</li>
+        <li>📊 Visual alert-based threat reporting</li>
+    </ul>
+
+    <p>
+        Tools like PCAPIFY are commonly used in:
+    </p>
+    <ul>
+        <li>Security Operations Centers (SOC)</li>
+        <li>Network Forensics Investigations</li>
+        <li>Cyber Security Research & Education</li>
+        <li>Enterprise Network Monitoring</li>
+    </ul>
+
+    <p>
+        <b>Note:</b> This project demonstrates frontend threat visualization
+        and logic simulation. Real-world systems integrate ML models and
+        backend packet analysis engines.
     </p>
 </div>
 
 </div>
+</div>
 
 <script>
-/* Page Control */
 function showPage(id){
-    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.querySelectorAll('.card').forEach(c=>{
+        c.classList.add('hidden');
+    });
     document.getElementById(id).classList.remove('hidden');
 }
 
-/* Login → Upload */
-function login(){
-    document.getElementById('navbar').classList.remove('hidden');
-    showPage('uploadPage');
-}
+function analyze(){
+    const file=document.getElementById("pcapFile").files[0];
+    if(!file){
+        alert("Please upload a PCAP file");
+        return;
+    }
 
-/* Logout */
-function logout(){
-    document.getElementById('navbar').classList.add('hidden');
-    showPage('login');
-}
+    const threatList=document.getElementById("threatList");
+    threatList.innerHTML="";
 
-/* Analyze PCAP (Demo Logic) */
-function analyzeFile(){
-    const file=document.getElementById('pcapFile').files[0];
-    if(!file){alert("Select a PCAP file");return;}
-
-    document.getElementById('resultFileName').innerText=file.name;
-    const list=document.getElementById('anomalyList');
-    list.innerHTML="";
-
-    let data=[], anomalies=0;
-    for(let i=1;i<=30;i++){
-        let score=Math.floor(Math.random()*10);
-        data.push(score);
-        if(score>6){
-            anomalies++;
-            let li=document.createElement('li');
-            li.innerText=`High anomaly detected at packet ${i}`;
-            list.appendChild(li);
+    let found=false;
+    for(let i=1;i<=12;i++){
+        if(Math.random()<0.45){
+            found=true;
+            const div=document.createElement("div");
+            div.className="threat";
+            div.innerText="⚠ Critical threat detected at packet "+i;
+            threatList.appendChild(div);
         }
     }
-    if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
 
-    drawGraph(data);
-    drawPie(anomalies, data.length-anomalies);
-    showPage('resultPage');
+    if(!found){
+        threatList.innerHTML="<p>✔ No threats detected. Network is clean.</p>";
+    }
+
+    showPage("results");
 }
-
-/* High-Definition Line Graph */
-function drawGraph(data){
-    const c=document.getElementById('graph');
-    const ctx=c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
-
-    ctx.strokeStyle="#555";
-    ctx.beginPath();
-    ctx.moveTo(60,20);
-    ctx.lineTo(60,c.height-50);
-    ctx.lineTo(c.width-20,c.height-50);
-    ctx.stroke();
-
-    ctx.fillStyle="#aaa";
-    ctx.fillText("Packets →", c.width/2, c.height-20);
-    ctx.save();
-    ctx.rotate(-Math.PI/2);
-    ctx.fillText("Anomaly Score", -c.height/2, 25);
-    ctx.restore();
-
-    ctx.strokeStyle="#00e6ff";
-    ctx.lineWidth=2;
-    ctx.beginPath();
-
-    let step=(c.width-100)/(data.length-1);
-    data.forEach((v,i)=>{
-        let x=60+i*step;
-        let y=(c.height-50)-(v*30);
-        if(i===0) ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-}
-
-/* High-Definition Pie Chart */
-function drawPie(anomaly, normal){
-    const c=document.getElementById('pie');
-    const ctx=c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
-
-    let total=anomaly+normal;
-    let start=0;
-
-    const slices=[
-        {val:normal,color:"#00e6ff",label:"Normal"},
-        {val:anomaly,color:"#ff5252",label:"Anomaly"}
-    ];
-
-    slices.forEach(s=>{
-        let angle=(s.val/total)*2*Math.PI;
-        ctx.fillStyle=s.color;
-        ctx.beginPath();
-        ctx.moveTo(200,200);
-        ctx.arc(200,200,150,start,start+angle);
-        ctx.fill();
-        start+=angle;
-    });
-
-    ctx.fillStyle="#fff";
-    ctx.fillText("Normal",420,160);
-    ctx.fillText("Anomaly",420,200);
-    ctx.fillStyle="#00e6ff";
-    ctx.fillRect(395,150,15,15);
-    ctx.fillStyle="#ff5252";
-    ctx.fillRect(395,190,15,15);
-}
-
-/* Force Login First */
-showPage('login');
 </script>
 
 </body>
