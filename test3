@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
 
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -17,7 +18,7 @@ body{
     perspective:1200px;
 }
 
-/* ===== Navbar ===== */
+/* ===== Top Navbar ===== */
 .navbar{
     height:60px;
     background:#000;
@@ -27,14 +28,13 @@ body{
     padding:0 30px;
     border-bottom:1px solid #444;
 }
-.logo{
+.navbar .logo{
+    color:#fff;
     font-size:20px;
     font-weight:bold;
-    letter-spacing:2px;
+    letter-spacing:1px;
 }
-
-/* ===== Menu ===== */
-.menu a{
+.navbar .menu a{
     color:#ccc;
     margin-left:20px;
     text-decoration:none;
@@ -42,16 +42,18 @@ body{
     border-radius:6px;
     transition:all .3s ease;
 }
-.menu a:hover{
+.navbar .menu a:hover{
     background:#fff;
     color:#000;
-    transform:translateZ(20px);
+    transform:translateZ(15px);
 }
 
-/* ===== Layout ===== */
-.main{ padding:30px; }
+/* ===== Main ===== */
+.main{
+    padding:30px;
+}
 
-/* ===== 3D CARDS ===== */
+/* ===== Cards (3D Zoom Effect) ===== */
 .card{
     max-width:900px;
     margin:auto;
@@ -62,16 +64,19 @@ body{
     border:1px solid #333;
 
     transform-style:preserve-3d;
-    transition:transform .5s ease, box-shadow .5s ease;
+    transition:transform .45s ease, box-shadow .45s ease;
 }
-
 .card:hover{
     transform:scale(1.05) rotateX(4deg) rotateY(-4deg);
-    box-shadow:0 25px 60px rgba(0,255,255,.25);
+    box-shadow:0 25px 60px rgba(0,230,255,0.25);
+}
+.card h2{
+    color:#fff;
+    margin-top:0;
 }
 
-/* ===== Inputs ===== */
-input,button{
+/* ===== Inputs & Buttons ===== */
+input, button{
     padding:10px;
     border-radius:6px;
 }
@@ -83,7 +88,7 @@ input{
     border:1px solid #fff;
 }
 
-/* ===== 3D BUTTON ===== */
+/* ===== Button 3D ===== */
 button{
     background:#fff;
     color:#000;
@@ -93,27 +98,36 @@ button{
     transition:transform .2s ease, box-shadow .2s ease;
 }
 button:hover{
-    transform:translateZ(15px) scale(1.05);
-    box-shadow:0 10px 30px rgba(255,255,255,.4);
+    transform:scale(1.08);
+    box-shadow:0 10px 25px rgba(255,255,255,.35);
 }
 button:active{
     transform:scale(.95);
 }
 
-.error{ color:#ff2b2b; font-weight:bold; }
-.hidden{ display:none; }
+/* ===== Error ===== */
+.error{
+    color:#ff2b2b;
+    font-weight:bold;
+}
 
+/* ===== Graph ===== */
 canvas{
     width:100%;
     background:#000;
+    border-radius:8px;
     margin-top:20px;
 }
+
+/* ===== Utilities ===== */
+.hidden{display:none}
+ul{margin-left:20px}
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+<!-- ===== Top Menu Bar ===== -->
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
     <div class="menu hidden" id="mainMenu">
@@ -127,28 +141,31 @@ canvas{
 
 <div class="main">
 
-<!-- LOGIN -->
+<!-- Login -->
 <div id="login" class="card">
     <h2>Login</h2>
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <p id="loginError" class="error hidden">Invalid credentials</p>
+    <p id="loginError" class="error hidden">Invalid username or password</p>
 </div>
 
-<!-- DASHBOARD -->
+<!-- Dashboard -->
 <div id="dashboard" class="card hidden">
     <h2>System Overview</h2>
-    <p>PCAPIFY detects anomalous network traffic from PCAP files.</p>
+    <p>
+        PCAPIFY analyzes <b>PCAP (Packet Capture)</b> files to identify
+        anomalous or suspicious network traffic.
+    </p>
     <ul>
-        <li>Intrusion Detection</li>
-        <li>Traffic Analysis</li>
-        <li>Security Monitoring</li>
+        <li>Abnormal traffic detection</li>
+        <li>Intrusion attempt identification</li>
+        <li>Network security visibility</li>
     </ul>
     <p><b>Total logins:</b> <span id="loginCount">0</span></p>
 </div>
 
-<!-- UPLOAD -->
+<!-- Upload -->
 <div id="uploadPage" class="card hidden">
     <h2>Upload PCAP File</h2>
     <input type="file" id="pcapFile" accept=".pcap">
@@ -156,23 +173,31 @@ canvas{
     <p id="fileError" class="error hidden">Please select a PCAP file</p>
 </div>
 
-<!-- RESULTS -->
+<!-- Results -->
 <div id="resultPage" class="card hidden">
     <h2>Analysis Results</h2>
     <p><b>File:</b> <span id="resultFileName"></span></p>
     <ul id="anomalyList"></ul>
 
-    <h3>Anomaly Score Timeline</h3>
-    <canvas id="lineGraph"></canvas>
+    <h3>Traffic Anomaly Line Graph</h3>
+    <canvas id="lineGraph" height="250"></canvas>
 
-    <h3>Anomaly Distribution</h3>
-    <canvas id="pieChart"></canvas>
+    <h3>Anomaly Distribution Pie Chart</h3>
+    <canvas id="pieChart" height="250"></canvas>
 </div>
 
-<!-- ABOUT -->
+<!-- About -->
 <div id="about" class="card hidden">
     <h2>About PCAPIFY</h2>
-    <p>A lightweight SOC-style PCAP anomaly visualization tool.</p>
+    <p>
+        PCAPIFY is a cybersecurity analysis tool for detecting suspicious
+        patterns in network packet captures.
+    </p>
+    <ul>
+        <li>Intrusion Detection Systems (IDS)</li>
+        <li>Network Forensics</li>
+        <li>Security Operations Center (SOC)</li>
+    </ul>
 </div>
 
 </div>
@@ -183,75 +208,64 @@ function showPage(id){
     document.getElementById(id).classList.remove('hidden');
 }
 
-/* LOGIN */
+/* Login */
 function login(){
-    if(username.value==="admin" && password.value==="admin"){
-        loginError.classList.add("hidden");
-        mainMenu.classList.remove("hidden");
+    const user=username.value;
+    const pass=password.value;
 
-        let c=+localStorage.getItem("loginCount")||0;
-        localStorage.setItem("loginCount",++c);
-        loginCount.innerText=c;
+    if(user==="admin" && pass==="admin"){
+        loginError.classList.add('hidden');
+        mainMenu.classList.remove('hidden');
 
-        showPage("dashboard");
-    } else loginError.classList.remove("hidden");
+        let count=+localStorage.getItem('loginCount')||0;
+        localStorage.setItem('loginCount',++count);
+        loginCount.innerText=count;
+
+        showPage('dashboard');
+    } else loginError.classList.remove('hidden');
 }
 
 function logout(){
-    mainMenu.classList.add("hidden");
-    showPage("login");
+    mainMenu.classList.add('hidden');
+    showPage('login');
+    username.value="";
+    password.value="";
 }
 
-/* ANALYSIS */
+/* Analyze */
 let lineChart,pieChart;
 
 function analyzeFile(){
     if(!pcapFile.files[0]){
-        fileError.classList.remove("hidden"); return;
+        fileError.classList.remove('hidden');
+        return;
     }
-    fileError.classList.add("hidden");
+    fileError.classList.add('hidden');
+
     resultFileName.innerText=pcapFile.files[0].name;
     anomalyList.innerHTML="";
 
-    let d=[],a=0,n=0;
+    let data=[],a=0,n=0;
     for(let i=1;i<=20;i++){
-        let v=Math.floor(Math.random()*10);
-        d.push(v);
-        if(v>6){ a++; anomalyList.innerHTML+=`<li class="error">High anomaly at packet ${i}</li>`;}
-        else n++;
+        let s=Math.floor(Math.random()*10);
+        data.push(s);
+        if(s>6){
+            a++;
+            anomalyList.innerHTML+=`<li class="error">High anomaly score at packet ${i}</li>`;
+        } else n++;
     }
     if(!a) anomalyList.innerHTML="<li>No anomalies detected</li>";
 
     if(lineChart) lineChart.destroy();
     lineChart=new Chart(lineGraph,{
-        type:"line",
+        type:'line',
         data:{
-            labels:d.map((_,i)=>`Pkt ${i+1}`),
+            labels:data.map((_,i)=>`Pkt ${i+1}`),
             datasets:[{
-                label:"Anomaly Score",
-                data:d,
-                borderColor:"#00e6ff",
-                backgroundColor:"rgba(0,230,255,.25)",
+                label:'Anomaly Score',
+                data,
+                borderColor:'#00e6ff',
+                backgroundColor:'rgba(0,230,255,.25)',
                 fill:true,
-                tension:.4,
-                pointBackgroundColor:d.map(v=>v>6?"#ff2b2b":"#fff"),
-                pointRadius:6
-            }]
-        }
-    });
-
-    if(pieChart) pieChart.destroy();
-    pieChart=new Chart(pieChart,{
-        type:"pie",
-        data:{
-            labels:["Anomaly","Normal"],
-            datasets:[{data:[a,n],backgroundColor:["#ff2b2b","#00e6ff"]}]
-        }
-    });
-
-    showPage("resultPage");
-}
-</script>
-
-</body>
-</html>
+                tension:.35,
+                pointBackgroundColor:data.map(v=>v>6?'#ff2b2b':'#fff'),
