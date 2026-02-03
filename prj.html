@@ -7,9 +7,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-
     <style>
         :root { --primary: #00ff88; --danger: #ff0055; --bg: #0b0c15; --card: #151621; --text: #e0e0e0; }
         body { font-family: 'Segoe UI', monospace; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
@@ -51,9 +48,9 @@
     <div id="login" class="page active">
         <div class="card">
             <h2>Secure Access</h2>
-            <p>Authenticated via Google Identity Platform</p>
-            <input type="email" id="email" placeholder="Enter your email">
-            <input type="password" id="password" placeholder="Enter your password">
+            <p>Enter Administrative Credentials</p>
+            <input type="email" id="email" placeholder="Username (admin)">
+            <input type="password" id="password" placeholder="Password (123)">
             <button class="btn-action" onclick="app.login()">Authenticate</button>
             <p id="login-error" style="color:var(--danger); font-size: 0.9rem; margin-top:10px;"></p>
         </div>
@@ -81,76 +78,57 @@
     </div>
 
     <script>
-        // --- 1. FIREBASE CONFIGURATION (ACTION REQUIRED) ---
-        // TODO: Paste your config here from Firebase Console!
-        const firebaseConfig = {
-            apiKey: "PASTE_YOUR_API_KEY_HERE",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
-        };
-
-        // Initialize Firebase
-        try {
-            firebase.initializeApp(firebaseConfig);
-        } catch (e) {
-            console.error("Firebase not configured correctly. Login will fail until keys are added.");
-        }
-
-        // --- 2. APPLICATION LOGIC ---
+        // --- APPLICATION LOGIC ---
         const app = {
             // Navigation
             showPage: (id) => {
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById(id).classList.add('active');
+                
+                // If going to dashboard, clear input for fresh start
+                if(id === 'dashboard') {
+                    document.getElementById('csvInput').value = ''; 
+                }
             },
 
-            // Authentication
+            // --- SIMULATED LOGIN ---
             login: () => {
-                const e = document.getElementById('email').value;
-                const p = document.getElementById('password').value;
+                const e = document.getElementById('email').value.trim();
+                const p = document.getElementById('password').value.trim();
                 const errBox = document.getElementById('login-error');
 
-                // If user didn't paste keys, show alert
-                if(firebaseConfig.apiKey === "PASTE_YOUR_API_KEY_HERE") {
-                    alert("⚠️ SYSTEM ERROR: Firebase Keys Missing.\n\nPlease edit index.html lines 106-113 and add your Firebase Config keys from the Firebase Console.");
-                    return;
+                // Hardcoded Credentials
+                if (e === "admin" && p === "123") {
+                    app.log(User ${e} authenticated.);
+                    app.showPage('dashboard');
+                    document.getElementById('nav-buttons').innerHTML = <span style='color:white; margin-right:10px'>Welcome, Administrator</span>;
+                } else {
+                    errBox.innerText = "Access Denied: Try admin / 123";
+                    app.log("Auth failed: Invalid credentials.");
                 }
-
-                firebase.auth().signInWithEmailAndPassword(e, p)
-                    .then((userCredential) => {
-                        app.log(User ${userCredential.user.email} authenticated.);
-                        app.showPage('dashboard');
-                        document.getElementById('nav-buttons').innerHTML = <span style='color:white; margin-right:10px'>Welcome, ${userCredential.user.email}</span>;
-                    })
-                    .catch((error) => {
-                        errBox.innerText = "Access Denied: " + error.message;
-                        app.log("Auth failed: " + error.message);
-                    });
             },
 
             logout: () => {
-                firebase.auth().signOut().then(() => {
-                    location.reload();
-                });
+                location.reload();
             },
 
             // Terminal Helper
             log: (msg) => {
                 const term = document.getElementById('terminal');
+                if(!term) return;
                 const time = new Date().toLocaleTimeString();
                 term.innerHTML += > [${time}] ${msg}<br>;
                 term.scrollTop = term.scrollHeight;
             },
 
-            // --- 3. COMPLEX ANALYSIS (REGEX & CHARTS) ---
+            // --- COMPLEX ANALYSIS (REGEX & CHARTS) ---
             processFile: () => {
-                const file = document.getElementById('csvInput').files[0];
+                const fileInput = document.getElementById('csvInput');
+                const file = fileInput.files[0];
                 if (!file) return;
 
                 app.log(Reading ${file.name} (${file.size} bytes)...);
+                
                 const reader = new FileReader();
                 reader.onload = (e) => app.analyzeData(e.target.result);
                 reader.readAsText(file);
@@ -158,47 +136,52 @@
 
             analyzeData: (csvText) => {
                 app.log("Parsing packet headers...");
-                const lines = csvText.split('\n');
                 
-                // DATA STORE
-                let stats = { safe: 0, sqlInjection: 0, badIP: 0, malware: 0 };
-                let total = 0;
+                // Simulate processing delay
+                setTimeout(() => {
+                    const lines = csvText.split('\n');
+                    
+                    // DATA STORE
+                    let stats = { safe: 0, sqlInjection: 0, badIP: 0, malware: 0 };
+                    let total = 0;
 
-                // REGEX PATTERNS (The "Complex" Part)
-                const regexIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/; 
-                const regexSQL = /(\%27)|(\')|(\-\-)|(\%23)|(#)|(DROP TABLE)|(UNION SELECT)/i;
-                const regexXSS = /(<script>)|(javascript:)|(onerror=)/i;
+                    // REGEX PATTERNS (The "Complex" Part)
+                    // Checks for SQL injection patterns like ' OR 1=1
+                    const regexSQL = /(\%27)|(\')|(\-\-)|(\%23)|(#)|(DROP TABLE)|(UNION SELECT)/i;
+                    // Checks for XSS scripting tags
+                    const regexXSS = /(<script>)|(javascript:)|(onerror=)/i;
 
-                lines.forEach((line, index) => {
-                    if(line.length < 5) return; // Skip empty lines
-                    total++;
-                    let isSafe = true;
+                    lines.forEach((line, index) => {
+                        if(line.length < 5) return; // Skip empty lines
+                        total++;
+                        let isSafe = true;
 
-                    // 1. Check SQL Injection
-                    if (regexSQL.test(line)) {
-                        stats.sqlInjection++;
-                        isSafe = false;
-                        app.log(⚠️ Packet #${index}: SQL Injection detected);
-                    }
-                    // 2. Check XSS/Malware
-                    else if (regexXSS.test(line) || line.toLowerCase().includes('malware')) {
-                        stats.malware++;
-                        isSafe = false;
-                        app.log(⚠️ Packet #${index}: Malicious Payload (XSS/Malware));
-                    }
-                    // 3. Check IP Format (Simplified for demo)
-                    // If we find an IP starting with '192.168.66' we assume it's a "Bad Actor" subnet
-                    else if (line.includes('192.168.66')) {
-                        stats.badIP++;
-                        isSafe = false;
-                        app.log(⚠️ Packet #${index}: Blacklisted Subnet);
-                    }
+                        // 1. Check SQL Injection
+                        if (regexSQL.test(line)) {
+                            stats.sqlInjection++;
+                            isSafe = false;
+                            app.log(⚠️ Packet #${index}: SQL Injection detected);
+                        }
+                        // 2. Check XSS/Malware
+                        else if (regexXSS.test(line) || line.toLowerCase().includes('malware')) {
+                            stats.malware++;
+                            isSafe = false;
+                            app.log(⚠️ Packet #${index}: Malicious Payload (XSS/Malware));
+                        }
+                        // 3. Check IP Format (Simplified logic for demo)
+                        // Marks 192.168.66.x as a "Blacklisted Subnet"
+                        else if (line.includes('192.168.66')) {
+                            stats.badIP++;
+                            isSafe = false;
+                            app.log(⚠️ Packet #${index}: Blacklisted Subnet);
+                        }
 
-                    if (isSafe) stats.safe++;
-                });
+                        if (isSafe) stats.safe++;
+                    });
 
-                app.log(Scan Complete. Processed ${total} packets.);
-                app.renderChart(stats);
+                    app.log(Scan Complete. Processed ${total} packets.);
+                    app.renderChart(stats);
+                }, 800); // 0.8s fake loading time
             },
 
             // CHART.JS RENDERING
