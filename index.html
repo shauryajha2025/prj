@@ -220,8 +220,10 @@ function logout(){
 }
 
 // Analyze PCAP file
+<script>
 async function analyzeFile(){
     const fileInput = document.getElementById("pcapFile");
+
     if(!fileInput.files.length){
         alert("Select a PCAP file");
         return;
@@ -230,14 +232,49 @@ async function analyzeFile(){
     const formData = new FormData();
     formData.append("pcap", fileInput.files[0]);
 
-    const res = await fetch("http://127.0.0.1:5000/analyze", {
-        method: "POST",
-        body: formData
-    });
+    try{
+        const res = await fetch("http://127.0.0.1:5000/analyze", {
+            method: "POST",
+            body: formData
+        });
 
-    const data = await res.json();
-    alert("Backend response: " + data.message);
+        const data = await res.json();
+
+        // show filename
+        document.getElementById("resultFileName").innerText =
+            fileInput.files[0].name;
+
+        // populate anomaly list
+        const list = document.getElementById("anomalyList");
+        list.innerHTML = "";
+
+        if(data.anomalies.length === 0){
+            list.innerHTML = "<li>No anomalies detected</li>";
+        } else {
+            data.anomalies.forEach(a => {
+                const li = document.createElement("li");
+                li.innerText = a;
+                list.appendChild(li);
+            });
+        }
+
+        // graphs
+        drawLineGraph(data.scores);
+
+        const high = data.scores.filter(v => v > 6).length;
+        const normal = data.scores.length - high;
+        drawPieChart(high, normal);
+
+        // show results page
+        showPage("resultPage");
+
+    } catch(err){
+        alert("Backend error. Check Flask console.");
+        console.error(err);
+    }
 }
+</script>
+
 
 // Line graph with data
 let lineChart;
@@ -309,3 +346,4 @@ document.getElementById('mainMenu').classList.add('hidden');
 
 </body>
 </html>
+
