@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
 
-<!-- Chart.js -->
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -28,6 +28,22 @@ body{
     padding:0 30px;
     border-bottom:1px solid #444;
 }
-
 .logo{
-    font-size:22px;
+    font-size:20px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+.menu a{
+    color:#ccc;
+    margin-left:20px;
+    text-decoration:none;
+    padding:8px 14px;
+    border-radius:6px;
+}
+.menu a:hover{
+    background:#fff;
+    color:#000;
+}
+
+/* ===== Main ===== */
+.main
