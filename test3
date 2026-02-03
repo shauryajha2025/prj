@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PCAPIFY | PCAP Anomaly Detection</title>
+<title>PCAPIFY</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* =====================================================
-   GLOBAL STYLES
-   ===================================================== */
 *{box-sizing:border-box}
 
 body{
@@ -15,11 +14,10 @@ body{
     font-family:"Segoe UI", Arial;
     background:#000;
     color:#fff;
+    perspective:1200px;
 }
 
-/* =====================================================
-   NAVBAR
-   ===================================================== */
+/* ===== Navbar ===== */
 .navbar{
     height:60px;
     background:#000;
@@ -30,101 +28,84 @@ body{
     border-bottom:1px solid #444;
 }
 .logo{
-    font-size:22px;
-    font-weight:800;
+    font-size:20px;
+    font-weight:bold;
     letter-spacing:2px;
 }
+
+/* ===== Menu ===== */
 .menu a{
     color:#ccc;
     margin-left:20px;
     text-decoration:none;
     padding:8px 14px;
     border-radius:6px;
+    transition:all .3s ease;
 }
 .menu a:hover{
     background:#fff;
     color:#000;
+    transform:translateZ(20px);
 }
 
-/* =====================================================
-   LAYOUT
-   ===================================================== */
-.main{ padding:30px }
+/* ===== Layout ===== */
+.main{ padding:30px; }
 
-/* =====================================================
-   CARD DESIGN
-   ===================================================== */
+/* ===== 3D CARDS ===== */
 .card{
     max-width:900px;
     margin:auto;
     background:#111;
     padding:25px;
     border-radius:12px;
-    border:1px solid #333;
     margin-bottom:30px;
-}
+    border:1px solid #333;
 
-/* =====================================================
-   LOGIN CARD – 3D EFFECT
-   ===================================================== */
-.login-3d{
-    max-width:420px;
-    transition:transform 0.15s ease, box-shadow 0.15s ease;
     transform-style:preserve-3d;
-}
-.login-3d:hover{
-    box-shadow:0 30px 60px rgba(255,255,255,0.25);
+    transition:transform .5s ease, box-shadow .5s ease;
 }
 
-/* =====================================================
-   INPUTS & BUTTONS
-   ===================================================== */
+.card:hover{
+    transform:scale(1.05) rotateX(4deg) rotateY(-4deg);
+    box-shadow:0 25px 60px rgba(0,255,255,.25);
+}
+
+/* ===== Inputs ===== */
+input,button{
+    padding:10px;
+    border-radius:6px;
+}
 input{
     width:100%;
     margin:10px 0;
-    padding:10px;
     background:#000;
     color:#fff;
     border:1px solid #fff;
-    border-radius:6px;
 }
+
+/* ===== 3D BUTTON ===== */
 button{
-    padding:10px;
-    border-radius:6px;
     background:#fff;
     color:#000;
     border:none;
     cursor:pointer;
     font-weight:bold;
+    transition:transform .2s ease, box-shadow .2s ease;
 }
-button:hover{ background:#ccc }
-
-/* =====================================================
-   UTILITIES
-   ===================================================== */
-.hidden{display:none}
-.error{color:#ff2b2b;font-weight:bold}
-ul{margin-left:20px}
-
-/* =====================================================
-   DASHBOARD ABOUT BOX
-   ===================================================== */
-.about-box{
-    margin-top:20px;
-    padding:15px;
-    background:#000;
-    border:1px solid #444;
-    border-radius:10px;
+button:hover{
+    transform:translateZ(15px) scale(1.05);
+    box-shadow:0 10px 30px rgba(255,255,255,.4);
 }
-.about-box h3{color:#ff2b2b}
+button:active{
+    transform:scale(.95);
+}
 
-/* =====================================================
-   GRAPH
-   ===================================================== */
+.error{ color:#ff2b2b; font-weight:bold; }
+.hidden{ display:none; }
+
 canvas{
     width:100%;
-    border:1px solid #fff;
-    border-radius:8px;
+    background:#000;
     margin-top:20px;
 }
 </style>
@@ -132,63 +113,42 @@ canvas{
 
 <body>
 
-<!-- =====================================================
-     NAVBAR
-     ===================================================== -->
+<!-- NAVBAR -->
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
     <div class="menu hidden" id="mainMenu">
-        <a href="#" onclick="showPage('dashboard')">Dashboard</a>
-        <a href="#" onclick="showPage('uploadPage')">Upload</a>
-        <a href="#" onclick="showPage('resultPage')">Results</a>
-        <a href="#" onclick="showPage('about')">About</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a onclick="showPage('dashboard')">Dashboard</a>
+        <a onclick="showPage('uploadPage')">Upload</a>
+        <a onclick="showPage('resultPage')">Results</a>
+        <a onclick="showPage('about')">About</a>
+        <a onclick="logout()">Logout</a>
     </div>
 </div>
 
 <div class="main">
 
-<!-- =====================================================
-     LOGIN PAGE
-     ===================================================== -->
-<div id="login" class="card login-3d">
-    <h2>Login to PCAPIFY</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
+<!-- LOGIN -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <p id="loginError" class="error hidden">Invalid username or password</p>
+    <p id="loginError" class="error hidden">Invalid credentials</p>
 </div>
 
-<!-- =====================================================
-     DASHBOARD
-     ===================================================== -->
+<!-- DASHBOARD -->
 <div id="dashboard" class="card hidden">
     <h2>System Overview</h2>
-    <p>
-        PCAPIFY analyzes <b>PCAP (Packet Capture)</b> files to detect
-        anomalous or suspicious network traffic.
-    </p>
-
+    <p>PCAPIFY detects anomalous network traffic from PCAP files.</p>
     <ul>
-        <li>Abnormal traffic detection</li>
-        <li>Intrusion attempt identification</li>
-        <li>Network security visibility</li>
+        <li>Intrusion Detection</li>
+        <li>Traffic Analysis</li>
+        <li>Security Monitoring</li>
     </ul>
-
     <p><b>Total logins:</b> <span id="loginCount">0</span></p>
-
-    <div class="about-box">
-        <h3>About PCAPIFY</h3>
-        <p>
-            PCAPIFY is a web-based cybersecurity tool designed for
-            anomaly detection, network forensics, and SOC analysis.
-        </p>
-    </div>
 </div>
 
-<!-- =====================================================
-     UPLOAD PAGE
-     ===================================================== -->
+<!-- UPLOAD -->
 <div id="uploadPage" class="card hidden">
     <h2>Upload PCAP File</h2>
     <input type="file" id="pcapFile" accept=".pcap">
@@ -196,22 +156,102 @@ canvas{
     <p id="fileError" class="error hidden">Please select a PCAP file</p>
 </div>
 
-<!-- =====================================================
-     RESULTS PAGE
-     ===================================================== -->
+<!-- RESULTS -->
 <div id="resultPage" class="card hidden">
     <h2>Analysis Results</h2>
     <p><b>File:</b> <span id="resultFileName"></span></p>
     <ul id="anomalyList"></ul>
-    <h3>Traffic Anomaly Graph</h3>
-    <canvas id="graph" height="250"></canvas>
+
+    <h3>Anomaly Score Timeline</h3>
+    <canvas id="lineGraph"></canvas>
+
+    <h3>Anomaly Distribution</h3>
+    <canvas id="pieChart"></canvas>
 </div>
 
-<!-- =====================================================
-     ABOUT PAGE
-     ===================================================== -->
+<!-- ABOUT -->
 <div id="about" class="card hidden">
     <h2>About PCAPIFY</h2>
-    <ul>
-        <li>Intrusion Detection Systems (IDS)</li>
-        <li>Netwo
+    <p>A lightweight SOC-style PCAP anomaly visualization tool.</p>
+</div>
+
+</div>
+
+<script>
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+/* LOGIN */
+function login(){
+    if(username.value==="admin" && password.value==="admin"){
+        loginError.classList.add("hidden");
+        mainMenu.classList.remove("hidden");
+
+        let c=+localStorage.getItem("loginCount")||0;
+        localStorage.setItem("loginCount",++c);
+        loginCount.innerText=c;
+
+        showPage("dashboard");
+    } else loginError.classList.remove("hidden");
+}
+
+function logout(){
+    mainMenu.classList.add("hidden");
+    showPage("login");
+}
+
+/* ANALYSIS */
+let lineChart,pieChart;
+
+function analyzeFile(){
+    if(!pcapFile.files[0]){
+        fileError.classList.remove("hidden"); return;
+    }
+    fileError.classList.add("hidden");
+    resultFileName.innerText=pcapFile.files[0].name;
+    anomalyList.innerHTML="";
+
+    let d=[],a=0,n=0;
+    for(let i=1;i<=20;i++){
+        let v=Math.floor(Math.random()*10);
+        d.push(v);
+        if(v>6){ a++; anomalyList.innerHTML+=`<li class="error">High anomaly at packet ${i}</li>`;}
+        else n++;
+    }
+    if(!a) anomalyList.innerHTML="<li>No anomalies detected</li>";
+
+    if(lineChart) lineChart.destroy();
+    lineChart=new Chart(lineGraph,{
+        type:"line",
+        data:{
+            labels:d.map((_,i)=>`Pkt ${i+1}`),
+            datasets:[{
+                label:"Anomaly Score",
+                data:d,
+                borderColor:"#00e6ff",
+                backgroundColor:"rgba(0,230,255,.25)",
+                fill:true,
+                tension:.4,
+                pointBackgroundColor:d.map(v=>v>6?"#ff2b2b":"#fff"),
+                pointRadius:6
+            }]
+        }
+    });
+
+    if(pieChart) pieChart.destroy();
+    pieChart=new Chart(pieChart,{
+        type:"pie",
+        data:{
+            labels:["Anomaly","Normal"],
+            datasets:[{data:[a,n],backgroundColor:["#ff2b2b","#00e6ff"]}]
+        }
+    });
+
+    showPage("resultPage");
+}
+</script>
+
+</body>
+</html>
