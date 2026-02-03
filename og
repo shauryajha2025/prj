@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PCAP Anomaly Analyzer</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:"Segoe UI", Arial;
+    background:#0b1c24;
+    color:#e0e0e0;
+}
+
+/* ===== Top Navbar ===== */
+.navbar{
+    height:60px;
+    background:#020d14;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    border-bottom:1px solid #0f3d4c;
+}
+.navbar .logo{
+    color:#00e6ff;
+    font-size:20px;
+    font-weight:bold;
+}
+.navbar .menu a{
+    color:#ccc;
+    margin-left:20px;
+    text-decoration:none;
+    padding:8px 14px;
+    border-radius:6px;
+}
+.navbar .menu a:hover{
+    background:#00e6ff;
+    color:#000;
+}
+
+/* ===== Main ===== */
+.main{
+    padding:30px;
+}
+
+/* ===== Cards ===== */
+.card{
+    max-width:900px;
+    margin:auto;
+    background:#071821;
+    padding:25px;
+    border-radius:10px;
+    margin-bottom:30px;
+    box-shadow:0 0 20px rgba(0,255,255,0.08);
+}
+.card h2{
+    color:#00e6ff;
+    margin-top:0;
+}
+
+/* ===== Inputs & Buttons ===== */
+input, button{
+    padding:10px;
+    border-radius:6px;
+}
+input{
+    width:100%;
+    margin:10px 0;
+    background:#020d14;
+    color:#fff;
+    border:1px solid #00e6ff;
+}
+button{
+    background:#00e6ff;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+button:hover{background:#00bcd4}
+
+/* ===== Graph ===== */
+canvas{
+    width:100%;
+    background:#020d14;
+    border:1px solid #00e6ff;
+    border-radius:8px;
+    margin-top:20px;
+}
+
+/* ===== Utilities ===== */
+.hidden{display:none}
+ul{margin-left:20px}
+</style>
+</head>
+
+<body>
+
+<!-- ===== Top Menu Bar ===== -->
+<div class="navbar">
+    <div class="logo">🔐 PCAP Anomaly Analyzer</div>
+    <div class="menu">
+        <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+        <a href="#" onclick="showPage('uploadPage')">Upload</a>
+        <a href="#" onclick="showPage('resultPage')">Results</a>
+        <a href="#" onclick="showPage('about')">About</a>
+        <a href="#" onclick="showPage('login')">Logout</a>
+    </div>
+</div>
+
+<div class="main">
+
+<!-- Login -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input type="text" placeholder="Username">
+    <input type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" class="card hidden">
+    <h2>System Overview</h2>
+    <p>
+        This dashboard analyzes <b>PCAP (Packet Capture)</b> files to identify
+        anomalous or suspicious network traffic.
+    </p>
+    <ul>
+        <li>✔ Abnormal traffic detection</li>
+        <li>✔ Intrusion attempt identification</li>
+        <li>✔ Network security visibility</li>
+    </ul>
+</div>
+
+<!-- Upload -->
+<div id="uploadPage" class="card hidden">
+    <h2>Upload PCAP File</h2>
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze</button>
+</div>
+
+<!-- Results -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p><b>File:</b> <span id="resultFileName"></span></p>
+
+    <ul id="anomalyList"></ul>
+
+    <h3 style="color:#00e6ff">Traffic Anomaly Graph</h3>
+    <canvas id="graph" height="250"></canvas>
+</div>
+
+<!-- About -->
+<div id="about" class="card hidden">
+    <h2>About the System</h2>
+    <p>
+        PCAP Anomaly Analyzer is a cyber security tool used for analyzing
+        network packet captures and detecting suspicious patterns.
+    </p>
+    <ul>
+        <li>Intrusion Detection Systems (IDS)</li>
+        <li>Network Forensics</li>
+        <li>Security Operations Center (SOC)</li>
+    </ul>
+</div>
+
+</div>
+
+<script>
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function login(){
+    showPage('dashboard');
+}
+
+function analyzeFile(){
+    const file=document.getElementById('pcapFile').files[0];
+    if(!file){alert("Select a PCAP file");return;}
+
+    document.getElementById('resultFileName').innerText=file.name;
+    const list=document.getElementById('anomalyList');
+    list.innerHTML="";
+
+    let data=[];
+    for(let i=1;i<=20;i++){
+        let score=Math.floor(Math.random()*10);
+        data.push(score);
+        if(score>6){
+            let li=document.createElement('li');
+            li.innerText="High anomaly score at packet "+i;
+            list.appendChild(li);
+        }
+    }
+    if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
+
+    drawGraph(data);
+    showPage('resultPage');
+}
+
+function drawGraph(data){
+    const c=document.getElementById('graph');
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+
+    ctx.strokeStyle="#00e6ff";
+    ctx.beginPath();
+
+    let step=c.width/(data.length-1);
+    data.forEach((v,i)=>{
+        let x=i*step;
+        let y=c.height-(v*20);
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+}
+</script>
+
+</body>
+</html>
