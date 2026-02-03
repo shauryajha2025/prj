@@ -2,94 +2,242 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PCAP Anomaly Analyzer | Dashboard</title>
+<title>PCAP Anomaly Analyzer</title>
 
 <style>
 *{box-sizing:border-box}
 body{
     margin:0;
-    font-family: "Segoe UI", Arial;
-    background: radial-gradient(circle at top, #021b0f, #000);
-    color:#caffca;
+    font-family:"Segoe UI", Arial;
+    background:#0b1c24;
+    color:#e0e0e0;
 }
 
-/* Layout */
+/* ===== Top Navbar ===== */
+.navbar{
+    height:60px;
+    background:#020d14;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    border-bottom:1px solid #0f3d4c;
+}
+.navbar h1{
+    color:#00e6ff;
+    font-size:20px;
+}
+.navbar span{
+    color:#aaa;
+}
+
+/* ===== Layout ===== */
 .wrapper{
     display:flex;
-    min-height:100vh;
+    min-height:calc(100vh - 60px);
 }
 
-/* Sidebar */
+/* ===== Sidebar ===== */
 .sidebar{
-    width:240px;
-    background:#010b06;
+    width:230px;
+    background:#020d14;
     padding:20px;
-    border-right:1px solid #00ff88;
-}
-.sidebar h2{
-    color:#00ff88;
-    text-align:center;
-    margin-bottom:30px;
+    border-right:1px solid #0f3d4c;
 }
 .sidebar a{
     display:block;
-    color:#bfffd9;
+    color:#ccc;
     padding:12px;
     margin:8px 0;
     text-decoration:none;
     border-radius:6px;
 }
 .sidebar a:hover{
-    background:#00ff88;
+    background:#00e6ff;
     color:#000;
 }
 
-/* Main Content */
+/* ===== Main ===== */
 .main{
     flex:1;
     padding:30px;
 }
 
-/* Cards */
+/* ===== Cards ===== */
 .card{
-    background:#03140c;
-    padding:20px;
-    border-radius:12px;
-    margin-bottom:20px;
-    box-shadow:0 0 20px rgba(0,255,136,0.15);
+    background:#071821;
+    padding:25px;
+    border-radius:10px;
+    margin-bottom:25px;
+    box-shadow:0 0 20px rgba(0,255,255,0.08);
 }
 .card h2{
-    color:#00ff88;
+    color:#00e6ff;
+    margin-top:0;
 }
 
-/* Buttons */
-button{
-    background:#00ff88;
-    color:#000;
-    border:none;
-    padding:10px 25px;
+/* ===== Inputs & Buttons ===== */
+input, button{
+    padding:10px;
     border-radius:6px;
+}
+input{
+    width:100%;
+    margin:10px 0;
+    background:#020d14;
+    color:#fff;
+    border:1px solid #00e6ff;
+}
+button{
+    background:#00e6ff;
+    border:none;
     cursor:pointer;
     font-weight:bold;
 }
-button:hover{background:#00cc6a}
+button:hover{background:#00bcd4}
 
-/* Inputs */
-input[type=text], input[type=password], input[type=file]{
-    width:100%;
-    padding:10px;
-    margin:10px 0;
-    background:#010b06;
-    color:#00ff88;
-    border:1px solid #00ff88;
-    border-radius:6px;
+/* ===== Graph ===== */
+canvas{
+    background:#020d14;
+    border:1px solid #00e6ff;
+    border-radius:8px;
+    margin-top:20px;
 }
 
-/* Threat style */
-.threat{
-    background:#140303;
-    color:#ff4d4d;
-    margin:10px 0;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid #
+/* ===== Utilities ===== */
+.hidden{display:none}
+ul{margin-left:20px}
+</style>
+</head>
+
+<body>
+
+<!-- ===== Top Menu Bar ===== -->
+<div class="navbar">
+    <h1>🔐 PCAP Anomaly Analyzer</h1>
+    <span>Cyber Security Dashboard</span>
+</div>
+
+<div class="wrapper">
+
+<!-- ===== Sidebar ===== -->
+<div class="sidebar">
+    <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+    <a href="#" onclick="showPage('uploadPage')">Upload PCAP</a>
+    <a href="#" onclick="showPage('resultPage')">Results</a>
+    <a href="#" onclick="showPage('about')">About</a>
+    <a href="#" onclick="showPage('login')">Logout</a>
+</div>
+
+<!-- ===== Main Content ===== -->
+<div class="main">
+
+<!-- Login -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input type="text" placeholder="Username">
+    <input type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" class="card hidden">
+    <h2>System Overview</h2>
+    <p>This system analyzes <b>PCAP files</b> to detect abnormal network behavior.</p>
+    <ul>
+        <li>✔ Traffic anomaly detection</li>
+        <li>✔ Intrusion pattern analysis</li>
+        <li>✔ Security visibility</li>
+    </ul>
+</div>
+
+<!-- Upload -->
+<div id="uploadPage" class="card hidden">
+    <h2>Upload PCAP File</h2>
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze</button>
+</div>
+
+<!-- Results -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p><b>File:</b> <span id="resultFileName"></span></p>
+
+    <ul id="anomalyList"></ul>
+
+    <h3 style="color:#00e6ff">Traffic Anomaly Graph</h3>
+    <canvas id="graph" width="600" height="250"></canvas>
+</div>
+
+<!-- About -->
+<div id="about" class="card hidden">
+    <h2>About</h2>
+    <p>
+        PCAP Anomaly Analyzer inspects captured packets and highlights
+        suspicious traffic patterns.
+    </p>
+    <ul>
+        <li>Intrusion Detection Systems</li>
+        <li>Network Forensics</li>
+        <li>SOC Monitoring</li>
+    </ul>
+</div>
+
+</div>
+</div>
+
+<script>
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function login(){
+    showPage('dashboard');
+}
+
+function analyzeFile(){
+    const file=document.getElementById('pcapFile').files[0];
+    if(!file){alert("Select a PCAP file");return;}
+    document.getElementById('resultFileName').innerText=file.name;
+
+    const list=document.getElementById('anomalyList');
+    list.innerHTML="";
+
+    let data=[];
+    for(let i=1;i<=20;i++){
+        let value=Math.floor(Math.random()*10);
+        data.push(value);
+        if(value>6){
+            let li=document.createElement('li');
+            li.innerText="High anomaly score at packet "+i;
+            list.appendChild(li);
+        }
+    }
+    if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
+
+    drawGraph(data);
+    showPage('resultPage');
+}
+
+function drawGraph(data){
+    const c=document.getElementById('graph');
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+
+    ctx.strokeStyle="#00e6ff";
+    ctx.beginPath();
+
+    let step=c.width/(data.length-1);
+    data.forEach((v,i)=>{
+        let x=i*step;
+        let y=c.height-(v*20);
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+}
+</script>
+
+</body>
+</html>
