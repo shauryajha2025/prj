@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
 
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 *{box-sizing:border-box}
 
@@ -95,7 +98,6 @@ button:hover{
 canvas{
     width:100%;
     background:#000;
-    border:1px solid #fff;
     border-radius:8px;
     margin-top:20px;
 }
@@ -158,11 +160,13 @@ ul{margin-left:20px}
 <div id="resultPage" class="card hidden">
     <h2>Analysis Results</h2>
     <p><b>File:</b> <span id="resultFileName"></span></p>
-
     <ul id="anomalyList"></ul>
 
-    <h3>Traffic Anomaly Graph</h3>
-    <canvas id="graph" height="250"></canvas>
+    <h3>Traffic Anomaly Line Graph</h3>
+    <canvas id="lineGraph" height="250"></canvas>
+
+    <h3>Anomaly Distribution Pie Chart</h3>
+    <canvas id="pieChart" height="250"></canvas>
 </div>
 
 <!-- About -->
@@ -187,38 +191,35 @@ function showPage(id){
     document.getElementById(id).classList.remove('hidden');
 }
 
-// Login function with counter
+// Login with counter
 function login(){
     const user=document.getElementById('username').value;
     const pass=document.getElementById('password').value;
     const error=document.getElementById('loginError');
 
-    // simple placeholder login
     if(user==="admin" && pass==="admin"){
         error.classList.add('hidden');
-        document.getElementById('mainMenu').classList.remove('hidden'); // show menu
+        document.getElementById('mainMenu').classList.remove('hidden');
 
-        // Update login counter in localStorage
         let count = localStorage.getItem('loginCount') || 0;
         count = parseInt(count) + 1;
         localStorage.setItem('loginCount', count);
-
-        // Show counter on dashboard
         document.getElementById('loginCount').innerText = count;
 
-        showPage('dashboard'); // show dashboard
+        showPage('dashboard');
     } else{
         error.classList.remove('hidden');
     }
 }
 
 function logout(){
-    document.getElementById('mainMenu').classList.add('hidden'); // hide menu
+    document.getElementById('mainMenu').classList.add('hidden');
     showPage('login');
     document.getElementById('username').value="";
     document.getElementById('password').value="";
 }
 
+// Analyze PCAP file
 function analyzeFile(){
     const file=document.getElementById('pcapFile').files[0];
     const error=document.getElementById('fileError');
@@ -234,37 +235,91 @@ function analyzeFile(){
     list.innerHTML="";
 
     let data=[];
+    let anomalies=0;
+    let normal=0;
+
     for(let i=1;i<=20;i++){
         let score=Math.floor(Math.random()*10);
         data.push(score);
         if(score>6){
+            anomalies++;
             let li=document.createElement('li');
             li.innerHTML="<span class='error'>High anomaly score</span> at packet "+i;
             list.appendChild(li);
+        } else {
+            normal++;
         }
     }
+
     if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
 
-    drawGraph(data);
+    drawLineGraph(data);
+    drawPieChart(anomalies, normal);
     showPage('resultPage');
 }
 
-function drawGraph(data){
-    const c=document.getElementById('graph');
-    const ctx=c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
+// Line graph with data
+let lineChart;
+function drawLineGraph(data){
+    const ctx=document.getElementById('lineGraph').getContext('2d');
+    if(lineChart) lineChart.destroy();
 
-    ctx.strokeStyle="#fff";
-    ctx.beginPath();
-
-    let step=c.width/(data.length-1);
-    data.forEach((v,i)=>{
-        let x=i*step;
-        let y=c.height-(v*20);
-        if(i===0) ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
+    lineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map((_,i)=>"Pkt "+(i+1)),
+            datasets: [{
+                label: 'Anomaly Score',
+                data: data,
+                borderColor: '#00e6ff',
+                backgroundColor: 'rgba(0,230,255,0.2)',
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: data.map(v => v>6 ? '#ff2b2b' : '#fff'),
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive:true,
+            plugins:{
+                legend:{display:true,color:'#fff'},
+                tooltip:{enabled:true},
+            },
+            scales:{
+                x:{
+                    ticks:{color:'#fff'}
+                },
+                y:{
+                    beginAtZero:true,
+                    max:10,
+                    ticks:{color:'#fff'}
+                }
+            }
+        }
     });
-    ctx.stroke();
+}
+
+// Pie chart
+let pieChart;
+function drawPieChart(anomalies, normal){
+    const ctx=document.getElementById('pieChart').getContext('2d');
+    if(pieChart) pieChart.destroy();
+
+    pieChart = new Chart(ctx,{
+        type:'pie',
+        data:{
+            labels:['High Anomaly','Normal'],
+            datasets:[{
+                data:[anomalies, normal],
+                backgroundColor:['#ff2b2b','#00e6ff']
+            }]
+        },
+        options:{
+            plugins:{
+                legend:{labels:{color:'#fff'}}
+            }
+        }
+    });
 }
 
 // hide menu at start
