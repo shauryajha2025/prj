@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PCAP Anomaly Analyzer</title>
+<style>
+body { font-family: Arial; background: #f4f4f9; margin:0; padding:0; }
+.container { max-width: 500px; margin: 50px auto; padding: 30px; background:white; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center; }
+h1,h2 { color:#333; }
+input, select { width: 80%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
+button, .btn { background:#4CAF50; color:white; padding:10px 25px; margin:10px 0; border:none; border-radius:5px; cursor:pointer; }
+button:hover, .btn:hover { background:#45a049; }
+a { color:#4CAF50; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.hidden { display:none; }
+ul { text-align:left; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- Home Page -->
+<div id="home">
+    <h1>Welcome to PCAP Anomaly Analyzer</h1>
+    <p>Analyze your network traffic for anomalies.</p>
+    <div class="buttons">
+        <button onclick="showPage('userLogin')">User Login</button>
+        <button onclick="showPage('adminLogin')">Admin Login</button>
+    </div>
+</div>
+
+<!-- User Login Page -->
+<div id="userLogin" class="hidden">
+    <h2>User Login</h2>
+    <input type="text" id="userUsername" placeholder="Username"><br>
+    <input type="password" id="userPassword" placeholder="Password"><br>
+    <button onclick="loginUser()">Login</button><br>
+    <a href="#" onclick="showPage('home')">Back to Home</a>
+</div>
+
+<!-- Admin Login Page -->
+<div id="adminLogin" class="hidden">
+    <h2>Admin Login</h2>
+    <input type="text" id="adminUsername" placeholder="Username"><br>
+    <input type="password" id="adminPassword" placeholder="Password"><br>
+    <button onclick="loginAdmin()">Login</button><br>
+    <a href="#" onclick="showPage('home')">Back to Home</a>
+</div>
+
+<!-- Upload Page -->
+<div id="uploadPage" class="hidden">
+    <h2>Upload PCAP File</h2>
+    <input type="file" id="pcapFile" accept=".pcap"><br>
+    <button onclick="analyzeFile()">Analyze</button><br>
+    <a href="#" onclick="showPage('home')">Back to Home</a>
+</div>
+
+<!-- Result Page -->
+<div id="resultPage" class="hidden">
+    <h2>Analysis Result</h2>
+    <p>File: <span id="resultFileName"></span></p>
+    <p>Anomalies detected at packets:</p>
+    <ul id="anomalyList"></ul>
+    <button onclick="showPage('uploadPage')">Analyze Another File</button><br>
+    <a href="#" onclick="showPage('home')">Back to Home</a>
+</div>
+
+</div>
+
+<script>
+// Page navigation
+function showPage(pageId){
+    const pages = ['home','userLogin','adminLogin','uploadPage','resultPage'];
+    pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+    document.getElementById(pageId).classList.remove('hidden');
+}
+
+// Dummy user login
+function loginUser(){
+    const user = document.getElementById('userUsername').value;
+    const pass = document.getElementById('userPassword').value;
+    if(user === "user" && pass === "password"){
+        alert("User login successful!");
+        showPage('uploadPage');
+    } else {
+        alert("Invalid user credentials!");
+    }
+}
+
+// Dummy admin login
+function loginAdmin(){
+    const user = document.getElementById('adminUsername').value;
+    const pass = document.getElementById('adminPassword').value;
+    if(user === "admin" && pass === "admin123"){
+        alert("Admin login successful!");
+        alert("Admin Dashboard - Here you can expand functionality");
+        showPage('home');
+    } else {
+        alert("Invalid admin credentials!");
+    }
+}
+
+// Dummy anomaly detection
+function analyzeFile(){
+    const fileInput = document.getElementById('pcapFile');
+    if(fileInput.files.length === 0){
+        alert("Please select a file.");
+        return;
+    }
+    const fileName = fileInput.files[0].name;
+    document.getElementById('resultFileName').innerText = fileName;
+
+    // Simulate anomalies
+    const anomalies = [];
+    const totalPackets = Math.floor(Math.random()*50)+10;
+    for(let i=0; i<totalPackets; i++){
+        if(Math.random()<0.1) anomalies.push(i+1);
+    }
+
+    const list = document.getElementById('anomalyList');
+    list.innerHTML = "";
+    if(anomalies.length === 0){
+        list.innerHTML = "<li>No anomalies detected</li>";
+    } else {
+        anomalies.forEach(a => {
+            const li = document.createElement('li');
+            li.innerText = "Packet " + a;
+            list.appendChild(li);
+        });
+    }
+
+    showPage('resultPage');
+}
+
+</script>
+
+</body>
+</html>
+
