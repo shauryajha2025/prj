@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
 
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 *{box-sizing:border-box}
 
@@ -36,10 +39,6 @@ body{
     text-decoration:none;
     padding:8px 14px;
     border-radius:6px;
-    pointer-events: none; /* disabled before login */
-}
-.navbar .menu a.enabled{
-    pointer-events: auto;
 }
 .navbar .menu a:hover{
     background:#fff;
@@ -99,7 +98,6 @@ button:hover{
 canvas{
     width:100%;
     background:#000;
-    border:1px solid #fff;
     border-radius:8px;
     margin-top:20px;
 }
@@ -115,12 +113,12 @@ ul{margin-left:20px}
 <!-- ===== Top Menu Bar ===== -->
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
-    <div class="menu">
-        <a href="#" id="menuDashboard" class="" onclick="showPage('dashboard')">Dashboard</a>
-        <a href="#" id="menuUpload" class="" onclick="showPage('uploadPage')">Upload</a>
-        <a href="#" id="menuResults" class="" onclick="showPage('resultPage')">Results</a>
-        <a href="#" id="menuAbout" class="" onclick="showPage('about')">About</a>
-        <a href="#" id="menuLogout" class="" onclick="logout()">Logout</a>
+    <div class="menu hidden" id="mainMenu">
+        <a href="#" id="menuDashboard" onclick="showPage('dashboard')">Dashboard</a>
+        <a href="#" id="menuUpload" onclick="showPage('uploadPage')">Upload</a>
+        <a href="#" id="menuResults" onclick="showPage('resultPage')">Results</a>
+        <a href="#" id="menuAbout" onclick="showPage('about')">About</a>
+        <a href="#" id="menuLogout" onclick="logout()">Logout</a>
     </div>
 </div>
 
@@ -129,4 +127,185 @@ ul{margin-left:20px}
 <!-- Login -->
 <div id="login" class="card">
     <h2>Login</h2>
-    <input type="text"
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="loginError" class="error hidden">Invalid username or password</p>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" class="card hidden">
+    <h2>System Overview</h2>
+    <p>
+        PCAPIFY analyzes <b>PCAP (Packet Capture)</b> files to identify
+        anomalous or suspicious network traffic.
+    </p>
+    <ul>
+        <li>Abnormal traffic detection</li>
+        <li>Intrusion attempt identification</li>
+        <li>Network security visibility</li>
+    </ul>
+    <p><b>Total logins:</b> <span id="loginCount">0</span></p>
+</div>
+
+<!-- Upload -->
+<div id="uploadPage" class="card hidden">
+    <h2>Upload PCAP File</h2>
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze</button>
+    <p id="fileError" class="error hidden">Please select a PCAP file</p>
+</div>
+
+<!-- Results -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p><b>File:</b> <span id="resultFileName"></span></p>
+    <ul id="anomalyList"></ul>
+
+    <h3>Traffic Anomaly Line Graph</h3>
+    <canvas id="lineGraph" height="250"></canvas>
+
+    <h3>Anomaly Distribution Pie Chart</h3>
+    <canvas id="pieChart" height="250"></canvas>
+</div>
+
+<!-- About -->
+<div id="about" class="card hidden">
+    <h2>About PCAPIFY</h2>
+    <p>
+        PCAPIFY is a cybersecurity analysis tool for detecting suspicious
+        patterns in network packet captures.
+    </p>
+    <ul>
+        <li>Intrusion Detection Systems (IDS)</li>
+        <li>Network Forensics</li>
+        <li>Security Operations Center (SOC)</li>
+    </ul>
+</div>
+
+</div>
+
+<script>
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+// Login with counter
+function login(){
+    const user=document.getElementById('username').value;
+    const pass=document.getElementById('password').value;
+    const error=document.getElementById('loginError');
+
+    if(user==="admin" && pass==="admin"){
+        error.classList.add('hidden');
+        document.getElementById('mainMenu').classList.remove('hidden');
+
+        let count = localStorage.getItem('loginCount') || 0;
+        count = parseInt(count) + 1;
+        localStorage.setItem('loginCount', count);
+        document.getElementById('loginCount').innerText = count;
+
+        showPage('dashboard');
+    } else{
+        error.classList.remove('hidden');
+    }
+}
+
+function logout(){
+    document.getElementById('mainMenu').classList.add('hidden');
+    showPage('login');
+    document.getElementById('username').value="";
+    document.getElementById('password').value="";
+}
+
+// Analyze PCAP file
+async function analyzeFile(){
+    const fileInput = document.getElementById("pcapFile");
+    if(!fileInput.files.length){
+        alert("Select a PCAP file");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("pcap", fileInput.files[0]);
+
+    const res = await fetch("http://127.0.0.1:5000/analyze", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+    alert("Backend response: " + data.message);
+}
+
+// Line graph with data
+let lineChart;
+function drawLineGraph(data){
+    const ctx=document.getElementById('lineGraph').getContext('2d');
+    if(lineChart) lineChart.destroy();
+
+    lineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map((_,i)=>"Pkt "+(i+1)),
+            datasets: [{
+                label: 'Anomaly Score',
+                data: data,
+                borderColor: '#00e6ff',
+                backgroundColor: 'rgba(0,230,255,0.2)',
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: data.map(v => v>6 ? '#ff2b2b' : '#fff'),
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive:true,
+            plugins:{
+                legend:{display:true,color:'#fff'},
+                tooltip:{enabled:true},
+            },
+            scales:{
+                x:{
+                    ticks:{color:'#fff'}
+                },
+                y:{
+                    beginAtZero:true,
+                    max:10,
+                    ticks:{color:'#fff'}
+                }
+            }
+        }
+    });
+}
+
+// Pie chart
+let pieChart;
+function drawPieChart(anomalies, normal){
+    const ctx=document.getElementById('pieChart').getContext('2d');
+    if(pieChart) pieChart.destroy();
+
+    pieChart = new Chart(ctx,{
+        type:'pie',
+        data:{
+            labels:['High Anomaly','Normal'],
+            datasets:[{
+                data:[anomalies, normal],
+                backgroundColor:['#ff2b2b','#00e6ff']
+            }]
+        },
+        options:{
+            plugins:{
+                legend:{labels:{color:'#fff'}}
+            }
+        }
+    });
+}
+
+// hide menu at start
+document.getElementById('mainMenu').classList.add('hidden');
+</script>
+
+</body>
+</html>
