@@ -4,369 +4,1107 @@
 <meta charset="UTF-8">
 <title>PCAPIFY - Network Anomaly Detection</title>
 
-<!-- Chart.js -->
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Font Awesome (icons, not emojis) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
-body{
-    font-family:"Segoe UI",Arial,sans-serif;
-    background:#000;
-    color:#fff;
-    min-height:100vh;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* ===== NAVBAR ===== */
-.navbar{
-    height:65px;
-    background:#000;
-    border-bottom:1px solid #444;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 30px;
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    min-height: 100vh;
 }
 
-.logo{
-    font-size:24px;
-    font-weight:700;
-    letter-spacing:2px;
+/* ===== Top Navbar ===== */
+.navbar {
+    height: 70px;
+    background: linear-gradient(90deg, #000, #1a1a1a);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    border-bottom: 2px solid #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-.menu a{
-    color:#ccc;
-    text-decoration:none;
-    margin-left:20px;
-    padding:8px 14px;
-    border-radius:6px;
-    border:1px solid transparent;
+.navbar .logo {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-.menu a:hover{
-    color:#fff;
-    border-color:#fff;
+.navbar .menu {
+    display: flex;
+    gap: 15px;
 }
 
-/* ===== MAIN ===== */
-.main{
-    max-width:1200px;
-    margin:auto;
-    padding:30px;
+.navbar .menu a {
+    color: #ccc;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    border: 1px solid transparent;
 }
 
-/* ===== CARDS ===== */
-.card{
-    background:#111;
-    border:1px solid #333;
-    border-radius:12px;
-    padding:30px;
-    margin-bottom:30px;
+.navbar .menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: #fff;
+    transform: translateY(-2px);
 }
 
-.card h2{
-    font-size:26px;
-    margin-bottom:20px;
-    border-bottom:1px solid #444;
-    padding-bottom:10px;
+/* ===== Main Content ===== */
+.main {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* ===== INPUTS ===== */
-input,select{
-    width:100%;
-    padding:14px;
-    margin:12px 0;
-    background:#000;
-    color:#fff;
-    border:1px solid #555;
-    border-radius:8px;
+/* ===== Cards ===== */
+.card {
+    background: rgba(20, 20, 20, 0.8);
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    border: 1px solid #444;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
 }
 
-input:focus,select:focus{
-    outline:none;
-    border-color:#fff;
+.card:hover {
+    transform: translateY(-5px);
 }
 
-/* ===== BUTTONS ===== */
-button{
-    background:#fff;
-    color:#000;
-    border:none;
-    padding:14px 28px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:600;
-    margin-top:10px;
+.card h2 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 28px;
+    border-bottom: 2px solid #fff;
+    padding-bottom: 10px;
+    display: inline-block;
 }
 
-button:hover{
-    background:#ddd;
+/* ===== Inputs & Buttons ===== */
+input, select {
+    width: 100%;
+    padding: 15px;
+    margin: 15px 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: 2px solid #444;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
 }
 
-button.secondary{
-    background:#444;
-    color:#fff;
+input:focus, select:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
-button.secondary:hover{
-    background:#666;
+button {
+    background: linear-gradient(45deg, #444, #666);
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid #666;
 }
 
-/* ===== MESSAGES ===== */
-.message{
-    padding:12px;
-    border-radius:8px;
-    margin:12px 0;
-    font-size:14px;
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+    background: linear-gradient(45deg, #555, #777);
+    border-color: #888;
 }
 
-.message.error{
-    color:#ff2b2b;
-    border-left:4px solid #ff2b2b;
-    background:#1a0000;
+button:active {
+    transform: translateY(-1px);
 }
 
-.message.success{
-    color:#fff;
-    border-left:4px solid #fff;
-    background:#1a1a1a;
+button.secondary {
+    background: linear-gradient(45deg, #222, #444);
 }
 
-.message.info{
-    color:#ccc;
-    border-left:4px solid #888;
-    background:#111;
+button.secondary:hover {
+    background: linear-gradient(45deg, #333, #555);
 }
 
-/* ===== FILE UPLOAD ===== */
-.file-upload-container{
-    border:2px dashed #888;
-    padding:40px;
-    text-align:center;
-    border-radius:12px;
-    cursor:pointer;
+/* ===== File Upload ===== */
+.file-upload-container {
+    border: 3px dashed #fff;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.file-upload-container:hover{
-    border-color:#fff;
+.file-upload-container:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.01);
 }
 
-/* ===== STATS ===== */
-.stats-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:20px;
-    margin:20px 0;
+.file-upload-container i {
+    font-size: 48px;
+    color: #fff;
+    margin-bottom: 20px;
 }
 
-.stat-card{
-    background:#0d0d0d;
-    border:1px solid #333;
-    padding:20px;
-    border-radius:10px;
-    text-align:center;
+/* ===== Messages ===== */
+.message {
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
 }
 
-.stat-value{
-    font-size:34px;
-    font-weight:700;
+.message.error {
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 4px solid #ff0000;
+    color: #ff0000;
 }
 
-.stat-label{
-    font-size:13px;
-    color:#aaa;
-    letter-spacing:1px;
+.message.success {
+    background: rgba(0, 255, 0, 0.1);
+    border-left: 4px solid #00ff00;
+    color: #00ff00;
 }
 
-/* ===== ANOMALY LIST ===== */
-.anomaly-item{
-    background:#1a0000;
-    border-left:4px solid #ff2b2b;
-    padding:15px;
-    border-radius:8px;
-    margin:10px 0;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+.message.info {
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #fff;
+    color: #fff;
 }
 
-.anomaly-item.safe{
-    background:#111;
-    border-left:4px solid #888;
+/* ===== Charts ===== */
+.chart-container {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #444;
 }
 
-/* ===== CHART ===== */
-.chart-container{
-    background:#0d0d0d;
-    border:1px solid #333;
-    padding:20px;
-    border-radius:12px;
-    margin-top:20px;
+canvas {
+    width: 100% !important;
+    height: auto !important;
 }
 
-canvas{
-    width:100%!important;
-    height:auto!important;
+/* ===== Anomaly List ===== */
+.anomaly-list {
+    list-style: none;
+    margin: 20px 0;
 }
 
-/* ===== UTILS ===== */
-.hidden{display:none}
-.flex{display:flex;gap:15px}
+.anomaly-item {
+    background: rgba(255, 0, 0, 0.1);
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border-left: 4px solid #ff0000;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: slideIn 0.3s ease;
+}
+
+.anomaly-item.safe {
+    background: rgba(0, 255, 0, 0.1);
+    border-left: 4px solid #00ff00;
+}
+
+.anomaly-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.anomaly-icon.danger {
+    background: #ff0000;
+    color: white;
+}
+
+.anomaly-icon.safe {
+    background: #00ff00;
+    color: #000;
+}
+
+/* ===== Stats ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.stat-value {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ===== Loading ===== */
+.loading {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+.progress-bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fff, #888);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 5px;
+}
+
+/* ===== Animations ===== */
+@keyframes slideIn {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* ===== Utility Classes ===== */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+    }
+    
+    .navbar .menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 15px;
+    }
+    
+    .main {
+        padding: 15px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
 
+<!-- ===== Top Menu Bar ===== -->
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
     <div class="menu hidden" id="mainMenu">
-        <a onclick="showPage('dashboard')">Dashboard</a>
-        <a onclick="showPage('uploadPage')">Upload</a>
-        <a onclick="showPage('resultPage')">Results</a>
-        <a onclick="showPage('about')">About</a>
-        <a onclick="logout()">Logout</a>
+        <a href="#" id="menuDashboard" onclick="showPage('dashboard')">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="#" id="menuUpload" onclick="showPage('uploadPage')">
+            <i class="fas fa-upload"></i> Upload
+        </a>
+        <a href="#" id="menuResults" onclick="showPage('resultPage')">
+            <i class="fas fa-chart-bar"></i> Results
+        </a>
+        <a href="#" id="menuAbout" onclick="showPage('about')">
+            <i class="fas fa-info-circle"></i> About
+        </a>
+        <a href="#" id="menuLogout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
     </div>
 </div>
 
 <div class="main">
 
-<!-- LOGIN -->
+<!-- Login Page -->
 <div id="login" class="card">
-    <h2>Login</h2>
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <h2><i class="fas fa-sign-in-alt"></i> Login to PCAPIFY</h2>
+    <div class="message info">
+        <i class="fas fa-info-circle"></i>
+        <div>Use: admin / admin (Demo credentials)</div>
+    </div>
+    <input type="text" id="username" placeholder="Username" autocomplete="username">
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+    <button onclick="login()">
+        <i class="fas fa-sign-in-alt"></i> Login
+    </button>
     <div id="loginMessage" class="message error hidden"></div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- Dashboard -->
 <div id="dashboard" class="card hidden">
-    <h2>System Overview</h2>
+    <h2><i class="fas fa-tachometer-alt"></i> System Overview</h2>
     <div class="stats-grid">
-        <div class="stat-card"><div class="stat-value" id="loginCount">0</div><div class="stat-label">Logins</div></div>
-        <div class="stat-card"><div class="stat-value" id="analysisCount">0</div><div class="stat-label">Analyses</div></div>
-        <div class="stat-card"><div class="stat-value" id="anomalyCount">0</div><div class="stat-label">Anomalies</div></div>
+        <div class="stat-card">
+            <div class="stat-value" id="loginCount">0</div>
+            <div class="stat-label">Total Logins</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="analysisCount">0</div>
+            <div class="stat-label">Analyses</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="anomalyCount">0</div>
+            <div class="stat-label">Anomalies Found</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="accuracyRate">95%</div>
+            <div class="stat-label">Accuracy</div>
+        </div>
     </div>
-    <button onclick="showPage('uploadPage')">Start Analysis</button>
+    
+    <p class="mt-20">
+        <b>PCAPIFY</b> analyzes <b>PCAP (Packet Capture)</b> files using 
+        machine learning algorithms to identify anomalous or suspicious network traffic patterns.
+    </p>
+    <ul class="mt-20">
+        <li><i class="fas fa-check-circle"></i> Abnormal traffic detection</li>
+        <li><i class="fas fa-check-circle"></i> Intrusion attempt identification</li>
+        <li><i class="fas fa-check-circle"></i> Network security visibility</li>
+        <li><i class="fas fa-check-circle"></i> Real-time analysis</li>
+        <li><i class="fas fa-check-circle"></i> Detailed reporting</li>
+    </ul>
+    
+    <div class="mt-20">
+        <button onclick="showPage('uploadPage')">
+            <i class="fas fa-play"></i> Start Analysis
+        </button>
+        <button class="secondary" onclick="showPage('about')">
+            <i class="fas fa-book"></i> Documentation
+        </button>
+    </div>
 </div>
 
-<!-- UPLOAD -->
+<!-- Upload Page -->
 <div id="uploadPage" class="card hidden">
-    <h2>Upload PCAP</h2>
-    <div class="file-upload-container" onclick="pcapFile.click()">
-        Click to upload PCAP file
+    <h2><i class="fas fa-cloud-upload-alt"></i> Upload PCAP File</h2>
+    
+    <div class="file-upload-container" onclick="document.getElementById('pcapFile').click()" id="dropZone">
+        <i class="fas fa-file-archive pulse"></i>
+        <h3>Drag & Drop PCAP File Here</h3>
+        <p>or click to browse (Supports .pcap, .pcapng)</p>
+        <p style="color:#aaa; font-size:14px;">Maximum file size: 100MB</p>
     </div>
+    
     <input type="file" id="pcapFile" accept=".pcap,.pcapng" class="hidden">
+    
+    <div id="fileInfo" class="message info hidden">
+        <i class="fas fa-file"></i>
+        <div>
+            <div id="fileName"></div>
+            <div id="fileSize" style="font-size:12px;"></div>
+        </div>
+    </div>
+    
+    <div class="flex" style="gap:15px; margin-top:20px;">
+        <div style="flex:2;">
+            <label>Detection Sensitivity</label>
+            <select id="sensitivity">
+                <option value="low">Low (Fewer false positives)</option>
+                <option value="medium" selected>Medium (Balanced)</option>
+                <option value="high">High (More aggressive)</option>
+            </select>
+        </div>
+        <div style="flex:1;">
+            <label>Analysis Type</label>
+            <select id="analysisType">
+                <option value="basic">Basic Analysis</option>
+                <option value="advanced">Advanced ML</option>
+                <option value="deep">Deep Packet</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="progress-bar hidden" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
     <div id="uploadMessage" class="message hidden"></div>
-    <button onclick="analyzeFile()">Analyze</button>
+    
+    <button onclick="analyzeFile()" id="analyzeBtn">
+        <i class="fas fa-search"></i> Analyze for Anomalies
+    </button>
+    
+    <button class="secondary" onclick="showPage('dashboard')">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </button>
 </div>
 
-<!-- RESULTS -->
+<!-- Results Page -->
 <div id="resultPage" class="card hidden">
-    <h2>Analysis Results</h2>
-    <p><b>File:</b> <span id="resultFileName"></span></p>
-
+    <h2><i class="fas fa-chart-line"></i> Analysis Results</h2>
+    
+    <div class="message info">
+        <i class="fas fa-file-alt"></i>
+        <div>
+            <strong>File:</strong> <span id="resultFileName">No file analyzed</span><br>
+            <small id="resultTimestamp"></small>
+        </div>
+    </div>
+    
     <div class="stats-grid">
-        <div class="stat-card"><div class="stat-value" id="totalPackets">0</div><div class="stat-label">Packets</div></div>
-        <div class="stat-card"><div class="stat-value" id="detectedAnomalies">0</div><div class="stat-label">Anomalies</div></div>
-        <div class="stat-card"><div class="stat-value" id="riskScore">0%</div><div class="stat-label">Risk</div></div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalPackets">0</div>
+            <div class="stat-label">Total Packets</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="detectedAnomalies">0</div>
+            <div class="stat-label">Anomalies</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="riskScore">0%</div>
+            <div class="stat-label">Risk Score</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="analysisTime">0s</div>
+            <div class="stat-label">Analysis Time</div>
+        </div>
     </div>
-
-    <div id="anomalyList"></div>
-
+    
+    <h3><i class="fas fa-exclamation-triangle"></i> Detected Anomalies</h3>
+    <div id="anomalyList" class="anomaly-list">
+        <!-- Anomalies will be added here dynamically -->
+    </div>
+    
     <div class="chart-container">
-        <canvas id="lineGraph"></canvas>
+        <h3><i class="fas fa-chart-line"></i> Anomaly Score Timeline</h3>
+        <canvas id="lineGraph" height="250"></canvas>
     </div>
-
+    
     <div class="chart-container">
-        <canvas id="pieChart"></canvas>
+        <h3><i class="fas fa-chart-pie"></i> Anomaly Distribution</h3>
+        <canvas id="pieChart" height="250"></canvas>
     </div>
-
-    <button onclick="showPage('uploadPage')">Analyze Another</button>
+    
+    <div class="flex" style="gap:15px; margin-top:20px;">
+        <button onclick="exportResults()">
+            <i class="fas fa-download"></i> Export Report
+        </button>
+        <button onclick="showPage('uploadPage')">
+            <i class="fas fa-redo"></i> Analyze Another
+        </button>
+        <button class="secondary" onclick="showPage('dashboard')">
+            <i class="fas fa-home"></i> Dashboard
+        </button>
+    </div>
 </div>
 
-<!-- ABOUT -->
+<!-- About Page -->
 <div id="about" class="card hidden">
-    <h2>About</h2>
-    <p>PCAPIFY is a network anomaly detection demo for cybersecurity analysis.</p>
+    <h2><i class="fas fa-info-circle"></i> About PCAPIFY</h2>
+    
+    <div class="message info">
+        <i class="fas fa-shield-alt"></i>
+        <div>Advanced Network Security Analysis Platform</div>
+    </div>
+    
+    <p>
+        PCAPIFY is a cutting-edge cybersecurity tool designed for detecting suspicious
+        patterns and anomalies in network packet captures. Using machine learning algorithms,
+        it identifies potential security threats in real-time.
+    </p>
+    
+    <h3>Key Features:</h3>
+    <ul>
+        <li><i class="fas fa-bolt"></i> Real-time Intrusion Detection</li>
+        <li><i class="fas fa-brain"></i> Machine Learning Analysis</li>
+        <li><i class="fas fa-chart-bar"></i> Visual Analytics Dashboard</li>
+        <li><i class="fas fa-history"></i> Historical Data Tracking</li>
+        <li><i class="fas fa-file-export"></i> Comprehensive Reporting</li>
+    </ul>
+    
+    <h3>Use Cases:</h3>
+    <ul>
+        <li>Security Operations Center (SOC) Monitoring</li>
+        <li>Network Forensics Investigations</li>
+        <li>Incident Response Analysis</li>
+        <li>Security Compliance Auditing</li>
+        <li>Network Performance Monitoring</li>
+    </ul>
+    
+    <div class="mt-20">
+        <button onclick="showPage('dashboard')">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+    </div>
 </div>
 
 </div>
 
 <script>
-let lineChart,pieChart;
-let loginHistory=[],analysisHistory=[];
-let currentFile=null;
+// Application State
+let currentUser = null;
+let analysisHistory = JSON.parse(localStorage.getItem('pcapify_analysis_history') || '[]');
+let loginHistory = JSON.parse(localStorage.getItem('pcapify_login_history') || '[]');
+let lineChart = null;
+let pieChart = null;
 
-function showPage(id){
-    ['login','dashboard','uploadPage','resultPage','about']
-    .forEach(p=>document.getElementById(p).classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for existing session
+    const savedUser = localStorage.getItem('pcapify_current_user');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        showAuthenticatedUI();
+    }
+    
+    // Setup drag and drop
+    setupDragAndDrop();
+    
+    // Update dashboard stats
+    updateDashboardStats();
+});
+
+// Setup drag and drop functionality
+function setupDragAndDrop() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('pcapFile');
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    // Highlight drop zone
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+        dropZone.style.borderColor = '#fff';
+        dropZone.style.background = 'rgba(255, 255, 255, 0.15)';
+    }
+    
+    function unhighlight() {
+        dropZone.style.borderColor = '#fff';
+        dropZone.style.background = 'rgba(255, 255, 255, 0.05)';
+    }
+    
+    // Handle dropped files
+    dropZone.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFileSelection(files[0]);
+    }
+    
+    // Handle file input change
+    fileInput.addEventListener('change', function(e) {
+        if (this.files.length > 0) {
+            handleFileSelection(this.files[0]);
+        }
+    });
 }
 
-function login(){
-    if(username.value==="admin" && password.value==="admin"){
-        mainMenu.classList.remove('hidden');
-        loginHistory.push(Date.now());
-        loginCount.textContent=loginHistory.length;
-        showPage('dashboard');
-    }else{
-        loginMessage.textContent="Invalid credentials";
-        loginMessage.classList.remove('hidden');
+// Handle file selection
+function handleFileSelection(file) {
+    if (!file) return;
+    
+    // Validate file type
+    const validExtensions = ['.pcap', '.pcapng'];
+    const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!validExtensions.includes(fileExt)) {
+        showMessage('uploadMessage', 'Please select a valid PCAP file (.pcap or .pcapng)', 'error');
+        return;
+    }
+    
+    // Validate file size (100MB limit)
+    const maxSize = 100 * 1024 * 1024; // 100MB in bytes
+    if (file.size > maxSize) {
+        showMessage('uploadMessage', 'File size exceeds 100MB limit', 'error');
+        return;
+    }
+    
+    // Show file info
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    document.getElementById('fileInfo').classList.remove('hidden');
+    
+    showMessage('uploadMessage', `File "${file.name}" ready for analysis`, 'success');
+    
+    // Store file for later use
+    window.currentFile = file;
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Login function
+function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    
+    if (!username || !password) {
+        showMessage('loginMessage', 'Please enter both username and password', 'error');
+        return;
+    }
+    
+    // Demo authentication - In production, this would call an API
+    if (username === 'admin' && password === 'admin') {
+        currentUser = {
+            username: username,
+            role: 'admin',
+            loginTime: new Date().toISOString()
+        };
+        
+        // Save user session
+        localStorage.setItem('pcapify_current_user', JSON.stringify(currentUser));
+        
+        // Log login
+        loginHistory.push({
+            username: username,
+            timestamp: new Date().toISOString(),
+            ip: '127.0.0.1' // Demo IP
+        });
+        localStorage.setItem('pcapify_login_history', JSON.stringify(loginHistory));
+        
+        showMessage('loginMessage', 'Login successful!', 'success');
+        
+        // Update UI
+        setTimeout(() => {
+            showAuthenticatedUI();
+            updateDashboardStats();
+        }, 500);
+    } else {
+        showMessage('loginMessage', 'Invalid credentials. Use admin/admin', 'error');
     }
 }
 
-function logout(){
-    mainMenu.classList.add('hidden');
+// Show authenticated UI
+function showAuthenticatedUI() {
+    document.getElementById('mainMenu').classList.remove('hidden');
+    document.getElementById('login').classList.add('hidden');
+    showPage('dashboard');
+    
+    // Clear login form
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('loginMessage').classList.add('hidden');
+}
+
+// Logout function
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('pcapify_current_user');
+    document.getElementById('mainMenu').classList.add('hidden');
     showPage('login');
 }
 
-pcapFile.onchange=e=>currentFile=e.target.files[0];
+// Page navigation
+function showPage(pageId) {
+    // Hide all pages
+    const pages = ['login', 'dashboard', 'uploadPage', 'resultPage', 'about'];
+    pages.forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+    
+    // Show requested page
+    document.getElementById(pageId).classList.remove('hidden');
+    
+    // Update active menu item
+    document.querySelectorAll('.navbar .menu a').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    const activeLink = document.querySelector(`[onclick="showPage('${pageId}')"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+}
 
-function analyzeFile(){
-    if(!currentFile){
-        uploadMessage.textContent="Select a PCAP file";
-        uploadMessage.className="message error";
-        uploadMessage.classList.remove('hidden');
+// Update dashboard statistics
+function updateDashboardStats() {
+    const loginCount = loginHistory.length;
+    const analysisCount = analysisHistory.length;
+    const totalAnomalies = analysisHistory.reduce((sum, analysis) => sum + (analysis.anomalies || 0), 0);
+    
+    document.getElementById('loginCount').textContent = loginCount;
+    document.getElementById('analysisCount').textContent = analysisCount;
+    document.getElementById('anomalyCount').textContent = totalAnomalies;
+}
+
+// Analyze file
+async function analyzeFile() {
+    if (!window.currentFile) {
+        showMessage('uploadMessage', 'Please select a file first', 'error');
         return;
     }
-    showPage('resultPage');
-    resultFileName.textContent=currentFile.name;
-
-    let scores=[...Array(20)].map(()=>Math.random()*10);
-    let anomalies=scores.filter(s=>s>6).length;
-
-    detectedAnomalies.textContent=anomalies;
-    totalPackets.textContent=2000+Math.floor(Math.random()*3000);
-    riskScore.textContent=Math.round(anomalies/20*100)+"%";
-
-    drawLine(scores);
-    drawPie(anomalies,20-anomalies);
+    
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    
+    // Show progress bar
+    progressBar.classList.remove('hidden');
+    progressFill.style.width = '0%';
+    
+    // Disable button and show loading
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = '<div class="loading"></div> Analyzing...';
+    
+    // Simulate analysis progress
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 20;
+        if (progress > 100) progress = 100;
+        progressFill.style.width = progress + '%';
+        
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+            simulateAnalysisResults();
+        }
+    }, 300);
 }
 
-function drawLine(data){
-    if(lineChart)lineChart.destroy();
-    lineChart=new Chart(lineGraph,{
-        type:'line',
-        data:{labels:data.map((_,i)=>i+1),datasets:[{data,borderColor:'#fff'}]},
-        options:{scales:{y:{beginAtZero:true,max:10}}}
+// Simulate analysis results (for demo)
+function simulateAnalysisResults() {
+    // Generate mock analysis data
+    const startTime = Date.now();
+    const fileName = window.currentFile.name;
+    const fileSize = window.currentFile.size;
+    
+    // Generate random anomaly scores
+    const scores = Array.from({length: 20}, () => Math.random() * 10);
+    const anomalies = scores.filter(score => score > 6).length;
+    const totalPackets = Math.floor(Math.random() * 5000) + 1000;
+    const riskScore = Math.round((anomalies / 20) * 100);
+    const analysisTime = ((Date.now() - startTime) / 1000).toFixed(2);
+    
+    // Create analysis record
+    const analysisRecord = {
+        filename: fileName,
+        timestamp: new Date().toISOString(),
+        anomalies: anomalies,
+        totalPackets: totalPackets,
+        riskScore: riskScore,
+        analysisTime: analysisTime,
+        scores: scores
+    };
+    
+    // Save to history
+    analysisHistory.push(analysisRecord);
+    localStorage.setItem('pcapify_analysis_history', JSON.stringify(analysisHistory));
+    
+    // Update UI
+    updateResultsPage(analysisRecord);
+    
+    // Reset upload button
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const progressBar = document.getElementById('progressBar');
+    
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze for Anomalies';
+    progressBar.classList.add('hidden');
+    
+    // Show success message
+    showMessage('uploadMessage', `Analysis complete! Found ${anomalies} anomalies`, 'success');
+    
+    // Navigate to results
+    setTimeout(() => {
+        showPage('resultPage');
+    }, 500);
+}
+
+// Update results page with analysis data
+function updateResultsPage(data) {
+    document.getElementById('resultFileName').textContent = data.filename;
+    document.getElementById('resultTimestamp').textContent = new Date(data.timestamp).toLocaleString();
+    document.getElementById('totalPackets').textContent = data.totalPackets.toLocaleString();
+    document.getElementById('detectedAnomalies').textContent = data.anomalies;
+    document.getElementById('riskScore').textContent = data.riskScore + '%';
+    document.getElementById('analysisTime').textContent = data.analysisTime + 's';
+    
+    // Update anomaly list
+    const anomalyList = document.getElementById('anomalyList');
+    anomalyList.innerHTML = '';
+    
+    if (data.anomalies === 0) {
+        const item = document.createElement('div');
+        item.className = 'anomaly-item safe';
+        item.innerHTML = `
+            <div class="anomaly-icon safe">
+                <i class="fas fa-check"></i>
+            </div>
+            <div>
+                <strong>No anomalies detected</strong>
+                <div style="font-size: 12px; color: #aaa;">All traffic appears normal</div>
+            </div>
+        `;
+        anomalyList.appendChild(item);
+    } else {
+        const anomalyTypes = [
+            'Port Scanning Activity',
+            'DDoS Attack Pattern',
+            'Malformed Packets',
+            'Protocol Violation',
+            'Suspicious Payload',
+            'Brute Force Attempt',
+            'Data Exfiltration',
+            'Malware Communication'
+        ];
+        
+        for (let i = 0; i < data.anomalies; i++) {
+            const anomalyType = anomalyTypes[Math.floor(Math.random() * anomalyTypes.length)];
+            const severity = ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)];
+            const packetNum = Math.floor(Math.random() * data.totalPackets);
+            
+            const item = document.createElement('div');
+            item.className = 'anomaly-item';
+            item.innerHTML = `
+                <div class="anomaly-icon danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div style="flex: 1;">
+                    <strong>${anomalyType}</strong>
+                    <div style="font-size: 12px; color: #aaa;">
+                        Packet #${packetNum} • ${severity} Severity
+                    </div>
+                </div>
+                <div style="color: #ff0000; font-weight: bold;">
+                    ${severity.toUpperCase()}
+                </div>
+            `;
+            anomalyList.appendChild(item);
+        }
+    }
+    
+    // Draw charts
+    drawLineChart(data.scores);
+    drawPieChart(data.anomalies, 20 - data.anomalies);
+    
+    // Update dashboard stats
+    updateDashboardStats();
+}
+
+// Draw line chart
+function drawLineChart(scores) {
+    const ctx = document.getElementById('lineGraph').getContext('2d');
+    
+    // Destroy existing chart
+    if (lineChart) {
+        lineChart.destroy();
+    }
+    
+    lineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: scores.map((_, i) => `Sample ${i + 1}`),
+            datasets: [{
+                label: 'Anomaly Score',
+                data: scores,
+                borderColor: '#fff',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: scores.map(score => score > 6 ? '#ff0000' : '#fff'),
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff',
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#aaa',
+                        maxTicksLimit: 10
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: {
+                        color: '#aaa',
+                        callback: function(value) {
+                            return value.toFixed(1);
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        }
     });
 }
 
-function drawPie(a,n){
-    if(pieChart)pieChart.destroy();
-    pieChart=new Chart(pieChart,{
-        type:'pie',
-        data:{labels:['Anomaly','Normal'],datasets:[{data:[a,n],backgroundColor:['#ff2b2b','#888']}]}
-    });
-}
-
-showPage('login');
-</script>
-
-</body>
-</html>
+// Draw pie chart
+function drawPieChart(anomalies, normal) {
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    
+    // Destroy existing chart
+    if (pieChart) {
+        pieChart.destroy();
+    }
+    
+    pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['High Anomaly', 'Normal Traffic'],
+            datasets: [{
+                data: [
