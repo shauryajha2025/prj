@@ -3,17 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 *{box-sizing:border-box}
-
 body{
     margin:0;
     font-family:"Segoe UI", Arial;
     background:#000;
     color:#fff;
+    perspective:1200px;
 }
 
 /* ===== Navbar ===== */
@@ -26,11 +25,7 @@ body{
     padding:0 30px;
     border-bottom:1px solid #444;
 }
-.logo{
-    font-size:20px;
-    font-weight:bold;
-    letter-spacing:2px;
-}
+.logo{font-size:20px;font-weight:bold}
 .menu a{
     color:#ccc;
     margin-left:20px;
@@ -38,146 +33,107 @@ body{
     padding:8px 14px;
     border-radius:6px;
 }
-.menu a:hover{
-    background:#fff;
-    color:#000;
-}
+.menu a:hover{background:#fff;color:#000}
 
-/* ===== Main ===== */
-.main{
-    padding:30px;
-}
-
-/* ===== Card ===== */
+/* ===== Cards ===== */
 .card{
-    max-width:420px;
-    margin:80px auto;
+    max-width:900px;
+    margin:auto;
     background:#111;
-    padding:30px;
-    border-radius:14px;
+    padding:25px;
+    border-radius:10px;
+    margin-bottom:30px;
     border:1px solid #333;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    transform-style: preserve-3d;
+    transition:.6s;
 }
-.card h2{
+.card:hover{
+    transform:translateZ(20px);
+    box-shadow:0 0 25px rgba(255,255,255,.12);
+}
+#login:hover{
+    transform:translateZ(45px) scale(1.05);
+}
+
+.tagline{
     text-align:center;
+    font-size:14px;
+    color:#ccc;
+    margin-bottom:15px;
 }
 
 /* ===== Inputs ===== */
+input,button{padding:10px;border-radius:6px}
 input{
     width:100%;
-    margin:12px 0;
-    padding:12px;
+    margin:10px 0;
     background:#000;
     color:#fff;
     border:1px solid #fff;
-    border-radius:6px;
 }
 button{
-    width:100%;
-    margin-top:10px;
-    padding:12px;
     background:#fff;
     color:#000;
     border:none;
-    border-radius:6px;
     font-weight:bold;
     cursor:pointer;
 }
-button:hover{
-    background:#ccc;
-}
+button:hover{transform:scale(1.05)}
 
-.error{
-    color:#ff2b2b;
-    font-weight:bold;
-    text-align:center;
-}
-
-/* ===== Utilities ===== */
 .hidden{display:none}
+.error{color:#ff2b2b;font-weight:bold}
+
+.glow-red{
+    color:#ff2b2b;
+    text-shadow:0 0 15px rgba(255,43,43,1);
+}
+
+canvas{
+    width:100%;
+    background:#000;
+    border-radius:8px;
+    margin-top:20px;
+}
 </style>
 </head>
 
 <body>
 
+<!-- NAVBAR -->
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
     <div class="menu hidden" id="mainMenu">
-        <a href="#" onclick="logout()">Logout</a>
+        <a onclick="showPage('dashboard')">Dashboard</a>
+        <a onclick="showPage('resultPage')">Results</a>
+        <a onclick="showPage('about')">About</a>
+        <a onclick="logout()">Logout</a>
     </div>
 </div>
 
 <div class="main">
 
-<!-- ===== Login ===== -->
+<!-- LOGIN -->
 <div id="login" class="card">
     <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
+    <div class="tagline">Advanced PCAP Intelligence for Smarter Network Security</div>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <p id="loginError" class="error hidden">Invalid username or password</p>
+    <p id="loginError" class="error hidden">Invalid credentials</p>
 </div>
 
+<!-- DASHBOARD (WITH UPLOAD) -->
+<div id="dashboard" class="card hidden">
+    <h2>System Dashboard</h2>
+    <p>Upload a PCAP file to analyze network traffic.</p>
+
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze PCAP</button>
+    <p id="fileError" class="error hidden">Please select a PCAP file</p>
+
+    <p><b>Total logins:</b> <span id="loginCount">0</span></p>
 </div>
 
-<script>
-/* ===== 3D Cursor Tilt Effect ===== */
-const loginCard = document.getElementById("login");
-
-loginCard.addEventListener("mousemove", (e) => {
-    const rect = loginCard.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateX = -(y - centerY) / 12;
-    const rotateY = (x - centerX) / 12;
-
-    loginCard.style.transform = `
-        perspective(1000px)
-        scale(1.06)
-        rotateX(${rotateX}deg)
-        rotateY(${rotateY}deg)
-    `;
-
-    loginCard.style.boxShadow = `
-        0 30px 60px rgba(0,0,0,0.9),
-        0 0 35px rgba(255,255,255,0.15)
-    `;
-});
-
-loginCard.addEventListener("mouseleave", () => {
-    loginCard.style.transform = `
-        perspective(1000px)
-        scale(1)
-        rotateX(0deg)
-        rotateY(0deg)
-    `;
-    loginCard.style.boxShadow = `0 15px 30px rgba(0,0,0,0.7)`;
-});
-
-/* ===== Login Logic ===== */
-function login(){
-    const user=document.getElementById('username').value;
-    const pass=document.getElementById('password').value;
-    const error=document.getElementById('loginError');
-
-    if(user==="admin" && pass==="admin"){
-        error.classList.add('hidden');
-        document.getElementById('mainMenu').classList.remove('hidden');
-        alert("Login Successful");
-    }else{
-        error.classList.remove('hidden');
-    }
-}
-
-function logout(){
-    document.getElementById('mainMenu').classList.add('hidden');
-}
-</script>
-
-</body>
-</html>
+<!-- RESULTS -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p><b>File:</b>
