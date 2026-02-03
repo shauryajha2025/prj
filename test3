@@ -15,10 +15,9 @@ body{
     font-family:"Segoe UI", Arial;
     background:#000;
     color:#fff;
-    perspective:1200px;
 }
 
-/* ===== Navbar ===== */
+/* ===== Top Navbar ===== */
 .navbar{
     height:60px;
     background:#000;
@@ -28,22 +27,9 @@ body{
     padding:0 30px;
     border-bottom:1px solid #444;
 }
-.logo{
+.navbar .logo{
+    color:#fff;
     font-size:20px;
     font-weight:bold;
-    letter-spacing:1px;
+    letter-spacing:2px;
 }
-.menu a{
-    color:#ccc;
-    margin-left:20px;
-    text-decoration:none;
-    padding:8px 14px;
-    border-radius:6px;
-}
-.menu a:hover{
-    background:#fff;
-    color:#000;
-}
-
-/* ===== Main ===== */
-.main
