@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PCAPIFY | Anomaly Detection Dashboard</title>
+<title>PCAPIFY</title>
 
 <style>
 *{box-sizing:border-box}
@@ -10,233 +10,162 @@
 body{
     margin:0;
     font-family:"Segoe UI", Arial;
-    background:radial-gradient(circle at top, #120000, #000);
-    color:#ffd6d6;
+    background:#000;
+    color:#fff;
 }
 
-/* Layout */
-.wrapper{
+/* ===== Top Navbar ===== */
+.navbar{
+    height:60px;
+    background:#000;
     display:flex;
-    min-height:100vh;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    border-bottom:1px solid #444;
 }
-
-/* Sidebar */
-.sidebar{
-    width:230px;
-    background:#080000;
-    padding:20px;
-    border-right:1px solid #ff1a1a;
+.navbar .logo{
+    color:#fff;
+    font-size:20px;
+    font-weight:bold;
+    letter-spacing:1px;
 }
-.sidebar h2{
-    color:#ff3333;
-    text-align:center;
-    margin-bottom:30px;
-}
-.sidebar a{
-    display:block;
-    color:#ffb3b3;
-    padding:12px;
-    margin:8px 0;
+.navbar .menu a{
+    color:#ccc;
+    margin-left:20px;
     text-decoration:none;
+    padding:8px 14px;
     border-radius:6px;
 }
-.sidebar a:hover{
-    background:#ff1a1a;
+.navbar .menu a:hover{
+    background:#fff;
     color:#000;
 }
 
-/* Main Content */
+/* ===== Main ===== */
 .main{
-    flex:1;
-    padding:20px;
+    padding:30px;
 }
 
-/* Top Dashboard */
-.top-dashboard{
-    background:#140000;
-    padding:20px;
-    border-radius:10px;
-    margin-bottom:20px;
-    border:1px solid #330000;
-}
-.top-dashboard h2{
-    color:#ff3333;
-    margin:0;
-}
-
-/* Cards */
+/* ===== Cards ===== */
 .card{
-    background:#140000;
-    padding:20px;
+    max-width:900px;
+    margin:auto;
+    background:#111;
+    padding:25px;
     border-radius:10px;
-    margin-bottom:20px;
-    border:1px solid #330000;
+    margin-bottom:30px;
+    border:1px solid #333;
 }
 .card h2{
-    color:#ff3333;
+    color:#fff;
+    margin-top:0;
 }
 
-/* Buttons */
+/* ===== Inputs & Buttons ===== */
+input, button{
+    padding:10px;
+    border-radius:6px;
+}
+input{
+    width:100%;
+    margin:10px 0;
+    background:#000;
+    color:#fff;
+    border:1px solid #fff;
+}
 button{
-    background:#ff1a1a;
+    background:#fff;
     color:#000;
     border:none;
-    padding:10px 25px;
-    border-radius:6px;
     cursor:pointer;
     font-weight:bold;
 }
 button:hover{
-    background:#cc0000;
+    background:#ccc;
 }
 
-/* Inputs */
-input{
+/* ===== Error / Alert ===== */
+.error{
+    color:#ff2b2b;
+    font-weight:bold;
+}
+
+/* ===== Graph ===== */
+canvas{
     width:100%;
-    padding:10px;
-    margin:10px 0;
-    background:#080000;
-    color:#ff9999;
-    border:1px solid #ff1a1a;
-    border-radius:6px;
-}
-
-/* Threat style */
-.threat{
-    background:#1a0000;
-    color:#ff4d4d;
-    margin:10px 0;
-    padding:14px;
+    background:#000;
+    border:1px solid #fff;
     border-radius:8px;
-    border-left:4px solid #ff0000;
+    margin-top:20px;
 }
 
-/* Utility */
+/* ===== Utilities ===== */
 .hidden{display:none}
-.center{
-    max-width:400px;
-    margin:100px auto;
-}
+ul{margin-left:20px}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="center card">
-    <h2>🔐 PCAPIFY Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
+<!-- ===== Top Menu Bar ===== -->
+<div class="navbar">
+    <div class="logo">PCAPIFY</div>
+    <div class="menu">
+        <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+        <a href="#" onclick="showPage('uploadPage')">Upload</a>
+        <a href="#" onclick="showPage('resultPage')">Results</a>
+        <a href="#" onclick="showPage('about')">About</a>
+        <a href="#" onclick="showPage('login')">Logout</a>
+    </div>
+</div>
+
+<div class="main">
+
+<!-- Login -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input type="text" placeholder="Username">
+    <input type="password" placeholder="Password">
     <button onclick="login()">Login</button>
 </div>
 
-<!-- MAIN APP -->
-<div id="app" class="wrapper hidden">
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>🔴 PCAPIFY</h2>
-        <a href="#" onclick="showPage('dashboard')">Dashboard</a>
-        <a href="#" onclick="showPage('upload')">Upload PCAP</a>
-        <a href="#" onclick="showPage('results')">Threat Results</a>
-        <a href="#" onclick="showPage('about')">About</a>
-        <a href="#" onclick="logout()">Logout</a>
-    </div>
-
-    <!-- Main -->
-    <div class="main">
-
-        <!-- TOP DASHBOARD -->
-        <div id="dashboard" class="top-dashboard">
-            <h2>Cyber Threat Monitoring Dashboard</h2>
-            <p>
-                Monitoring PCAP traffic for suspicious and malicious activity
-                in real-time SOC-like environment.
-            </p>
-        </div>
-
-        <!-- Upload -->
-        <div id="upload" class="card hidden">
-            <h2>Upload PCAP File</h2>
-            <input type="file" id="pcapFile" accept=".pcap">
-            <button onclick="analyze()">Start Analysis</button>
-        </div>
-
-        <!-- Results -->
-        <div id="results" class="card hidden">
-            <h2>Detected Threats</h2>
-            <div id="threatList"></div>
-        </div>
-
-        <!-- About -->
-        <div id="about" class="card hidden">
-            <h2>About PCAPIFY</h2>
-            <p>
-                PCAPIFY is a frontend simulation of a PCAP anomaly detection
-                system used to visualize suspicious network traffic.
-            </p>
-            <ul>
-                <li>Packet-level traffic inspection</li>
-                <li>Anomaly & intrusion detection simulation</li>
-                <li>SOC-style alert visualization</li>
-                <li>Cyber security education & demos</li>
-            </ul>
-        </div>
-
-    </div>
+<!-- Dashboard -->
+<div id="dashboard" class="card hidden">
+    <h2>System Overview</h2>
+    <p>
+        PCAPIFY analyzes <b>PCAP (Packet Capture)</b> files to identify
+        anomalous or suspicious network traffic.
+    </p>
+    <ul>
+        <li>Abnormal traffic detection</li>
+        <li>Intrusion attempt identification</li>
+        <li>Network security visibility</li>
+    </ul>
 </div>
 
-<script>
-function login(){
-    const u=document.getElementById("username").value;
-    const p=document.getElementById("password").value;
-    if(u && p){
-        document.getElementById("loginPage").classList.add("hidden");
-        document.getElementById("app").classList.remove("hidden");
-    }else{
-        alert("Enter username and password");
-    }
-}
+<!-- Upload -->
+<div id="uploadPage" class="card hidden">
+    <h2>Upload PCAP File</h2>
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze</button>
+    <p id="fileError" class="error hidden">Please select a PCAP file</p>
+</div>
 
-function logout(){
-    location.reload();
-}
+<!-- Results -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p><b>File:</b> <span id="resultFileName"></span></p>
 
-function showPage(id){
-    document.querySelectorAll('.card').forEach(c=>{
-        c.classList.add('hidden');
-    });
-    document.getElementById(id).classList.remove('hidden');
-}
+    <ul id="anomalyList"></ul>
 
-function analyze(){
-    const file=document.getElementById("pcapFile").files[0];
-    if(!file){
-        alert("Please upload a PCAP file");
-        return;
-    }
+    <h3>Traffic Anomaly Graph</h3>
+    <canvas id="graph" height="250"></canvas>
+</div>
 
-    const list=document.getElementById("threatList");
-    list.innerHTML="";
-    let found=false;
-
-    for(let i=1;i<=12;i++){
-        if(Math.random()<0.4){
-            found=true;
-            const div=document.createElement("div");
-            div.className="threat";
-            div.innerText="⚠ Critical threat detected at packet "+i;
-            list.appendChild(div);
-        }
-    }
-
-    if(!found){
-        list.innerHTML="<p>✔ No threats detected</p>";
-    }
-
-    showPage("results");
-}
-</script>
-
-</body>
-</html>
+<!-- About -->
+<div id="about" class="card hidden">
+    <h2>About PCAPIFY</h2>
+    <p>
+        PCAPIFY is a cybersecurity analysis tool for detecting suspicious
+        patterns in ne
