@@ -3,155 +3,239 @@
 <head>
 <meta charset="UTF-8">
 <title>PCAP Anomaly Analyzer</title>
+
 <style>
-body { font-family: 'Segoe UI', Arial; background: #eef2f7; margin:0; padding:0; }
-.container { max-width: 500px; margin: 50px auto; padding: 30px; background:white; border-radius:10px; box-shadow:0 5px 20px rgba(0,0,0,0.2); text-align:center; transition: all 0.5s ease; }
-h1,h2 { color:#333; margin-bottom:20px; }
-input { width: 80%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #ccc; transition: 0.3s; }
-input:focus { border-color:#4CAF50; box-shadow:0 0 5px #4CAF50; outline:none; }
-button, .btn { background:#4CAF50; color:white; padding:12px 25px; margin:15px 0; border:none; border-radius:8px; cursor:pointer; transition: 0.3s; font-size:16px; }
-button:hover, .btn:hover { background:#45a049; transform: scale(1.05); }
-a { color:#4CAF50; text-decoration:none; transition:0.2s; }
-a:hover { text-decoration:underline; color:#388e3c; }
-.hidden { display:none; opacity:0; transition: opacity 0.5s ease; }
-.show { display:block; opacity:1; }
-ul { text-align:left; padding-left:20px; }
-li.anomaly { color: red; font-weight:bold; }
-#fileNamePreview { margin-top: 10px; font-style: italic; color:#555; }
-.message { color:red; font-size:14px; height:18px; }
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:"Segoe UI", Arial;
+    background:#0b1c24;
+    color:#e0e0e0;
+}
+
+/* ===== Top Navbar ===== */
+.navbar{
+    height:60px;
+    background:#020d14;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    border-bottom:1px solid #0f3d4c;
+}
+.navbar h1{
+    color:#00e6ff;
+    font-size:20px;
+}
+.navbar span{
+    color:#aaa;
+}
+
+/* ===== Layout ===== */
+.wrapper{
+    display:flex;
+    min-height:calc(100vh - 60px);
+}
+
+/* ===== Sidebar ===== */
+.sidebar{
+    width:230px;
+    background:#020d14;
+    padding:20px;
+    border-right:1px solid #0f3d4c;
+}
+.sidebar a{
+    display:block;
+    color:#ccc;
+    padding:12px;
+    margin:8px 0;
+    text-decoration:none;
+    border-radius:6px;
+}
+.sidebar a:hover{
+    background:#00e6ff;
+    color:#000;
+}
+
+/* ===== Main ===== */
+.main{
+    flex:1;
+    padding:30px;
+}
+
+/* ===== Cards ===== */
+.card{
+    background:#071821;
+    padding:25px;
+    border-radius:10px;
+    margin-bottom:25px;
+    box-shadow:0 0 20px rgba(0,255,255,0.08);
+}
+.card h2{
+    color:#00e6ff;
+    margin-top:0;
+}
+
+/* ===== Inputs & Buttons ===== */
+input, button{
+    padding:10px;
+    border-radius:6px;
+}
+input{
+    width:100%;
+    margin:10px 0;
+    background:#020d14;
+    color:#fff;
+    border:1px solid #00e6ff;
+}
+button{
+    background:#00e6ff;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+button:hover{background:#00bcd4}
+
+/* ===== Graph ===== */
+canvas{
+    background:#020d14;
+    border:1px solid #00e6ff;
+    border-radius:8px;
+    margin-top:20px;
+}
+
+/* ===== Utilities ===== */
+.hidden{display:none}
+ul{margin-left:20px}
 </style>
 </head>
+
 <body>
 
-<div class="container">
-
-<!-- Home Page -->
-<div id="home" class="show">
-    <h1>Welcome to PCAP Anomaly Analyzer</h1>
-    <p>Analyze your network traffic for anomalies.</p>
-    <div class="buttons">
-        <button onclick="showPage('userLogin')">User Login</button>
-        <button onclick="showPage('adminLogin')">Admin Login</button>
-    </div>
+<!-- ===== Top Menu Bar ===== -->
+<div class="navbar">
+    <h1>🔐 PCAP Anomaly Analyzer</h1>
+    <span>Cyber Security Dashboard</span>
 </div>
 
-<!-- User Login Page -->
-<div id="userLogin" class="hidden">
-    <h2>User Login</h2>
-    <input type="text" id="userUsername" placeholder="Username"><br>
-    <input type="password" id="userPassword" placeholder="Password"><br>
-    <div class="message" id="userLoginMsg"></div>
-    <button onclick="loginUser()">Login</button><br>
-    <a href="#" onclick="showPage('home')">Back to Home</a>
+<div class="wrapper">
+
+<!-- ===== Sidebar ===== -->
+<div class="sidebar">
+    <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+    <a href="#" onclick="showPage('uploadPage')">Upload PCAP</a>
+    <a href="#" onclick="showPage('resultPage')">Results</a>
+    <a href="#" onclick="showPage('about')">About</a>
+    <a href="#" onclick="showPage('login')">Logout</a>
 </div>
 
-<!-- Admin Login Page -->
-<div id="adminLogin" class="hidden">
-    <h2>Admin Login</h2>
-    <input type="text" id="adminUsername" placeholder="Username"><br>
-    <input type="password" id="adminPassword" placeholder="Password"><br>
-    <div class="message" id="adminLoginMsg"></div>
-    <button onclick="loginAdmin()">Login</button><br>
-    <a href="#" onclick="showPage('home')">Back to Home</a>
+<!-- ===== Main Content ===== -->
+<div class="main">
+
+<!-- Login -->
+<div id="login" class="card">
+    <h2>Login</h2>
+    <input type="text" placeholder="Username">
+    <input type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
 </div>
 
-<!-- Upload Page -->
-<div id="uploadPage" class="hidden">
+<!-- Dashboard -->
+<div id="dashboard" class="card hidden">
+    <h2>System Overview</h2>
+    <p>This system analyzes <b>PCAP files</b> to detect abnormal network behavior.</p>
+    <ul>
+        <li>✔ Traffic anomaly detection</li>
+        <li>✔ Intrusion pattern analysis</li>
+        <li>✔ Security visibility</li>
+    </ul>
+</div>
+
+<!-- Upload -->
+<div id="uploadPage" class="card hidden">
     <h2>Upload PCAP File</h2>
-    <input type="file" id="pcapFile" accept=".pcap" onchange="previewFile()"><br>
-    <div id="fileNamePreview"></div>
-    <button onclick="analyzeFile()">Analyze</button><br>
-    <a href="#" onclick="showPage('home')">Back to Home</a>
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze</button>
 </div>
 
-<!-- Result Page -->
-<div id="resultPage" class="hidden">
-    <h2>Analysis Result</h2>
-    <p>File: <span id="resultFileName"></span></p>
-    <p>Anomalies detected at packets:</p>
+<!-- Results -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p><b>File:</b> <span id="resultFileName"></span></p>
+
     <ul id="anomalyList"></ul>
-    <button onclick="showPage('uploadPage')">Analyze Another File</button><br>
-    <a href="#" onclick="showPage('home')">Back to Home</a>
+
+    <h3 style="color:#00e6ff">Traffic Anomaly Graph</h3>
+    <canvas id="graph" width="600" height="250"></canvas>
 </div>
 
+<!-- About -->
+<div id="about" class="card hidden">
+    <h2>About</h2>
+    <p>
+        PCAP Anomaly Analyzer inspects captured packets and highlights
+        suspicious traffic patterns.
+    </p>
+    <ul>
+        <li>Intrusion Detection Systems</li>
+        <li>Network Forensics</li>
+        <li>SOC Monitoring</li>
+    </ul>
+</div>
+
+</div>
 </div>
 
 <script>
-// Smooth page transition
-function showPage(pageId){
-    const pages = ['home','userLogin','adminLogin','uploadPage','resultPage'];
-    pages.forEach(p => {
-        document.getElementById(p).classList.remove('show');
-        document.getElementById(p).classList.add('hidden');
-    });
-    setTimeout(()=> {
-        document.getElementById(pageId).classList.remove('hidden');
-        document.getElementById(pageId).classList.add('show');
-    }, 100);
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
 }
 
-// File preview
-function previewFile(){
-    const fileInput = document.getElementById('pcapFile');
-    if(fileInput.files.length>0){
-        document.getElementById('fileNamePreview').innerText = "Selected: " + fileInput.files[0].name;
-    } else {
-        document.getElementById('fileNamePreview').innerText = "";
-    }
+function login(){
+    showPage('dashboard');
 }
 
-// User login validation
-function loginUser(){
-    const user = document.getElementById('userUsername').value.trim();
-    const pass = document.getElementById('userPassword').value.trim();
-    const msg = document.getElementById('userLoginMsg');
-    if(user==='' || pass===''){ msg.innerText="Please enter both fields"; return; }
-    if(user==='user' && pass==='password'){
-        msg.style.color='green';
-        msg.innerText="Login successful!";
-        setTimeout(()=> showPage('uploadPage'), 500);
-    } else { msg.style.color='red'; msg.innerText="Invalid credentials"; }
-}
-
-// Admin login validation
-function loginAdmin(){
-    const user = document.getElementById('adminUsername').value.trim();
-    const pass = document.getElementById('adminPassword').value.trim();
-    const msg = document.getElementById('adminLoginMsg');
-    if(user==='' || pass===''){ msg.innerText="Please enter both fields"; return; }
-    if(user==='admin' && pass==='admin123'){
-        msg.style.color='green';
-        msg.innerText="Login successful!";
-        setTimeout(()=> { alert("Admin Dashboard (expandable)"); showPage('home'); }, 500);
-    } else { msg.style.color='red'; msg.innerText="Invalid credentials"; }
-}
-
-// Simulated anomaly detection
 function analyzeFile(){
-    const fileInput = document.getElementById('pcapFile');
-    if(fileInput.files.length===0){ alert("Select a file"); return; }
+    const file=document.getElementById('pcapFile').files[0];
+    if(!file){alert("Select a PCAP file");return;}
+    document.getElementById('resultFileName').innerText=file.name;
 
-    const fileName = fileInput.files[0].name;
-    document.getElementById('resultFileName').innerText = fileName;
+    const list=document.getElementById('anomalyList');
+    list.innerHTML="";
 
-    // Simulate anomalies
-    const anomalies = [];
-    const totalPackets = Math.floor(Math.random()*50)+10;
-    for(let i=0;i<totalPackets;i++){
-        if(Math.random()<0.1) anomalies.push(i+1);
+    let data=[];
+    for(let i=1;i<=20;i++){
+        let value=Math.floor(Math.random()*10);
+        data.push(value);
+        if(value>6){
+            let li=document.createElement('li');
+            li.innerText="High anomaly score at packet "+i;
+            list.appendChild(li);
+        }
     }
+    if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
 
-    const list = document.getElementById('anomalyList');
-    list.innerHTML = '';
-    if(anomalies.length===0) list.innerHTML="<li>No anomalies detected</li>";
-    else anomalies.forEach(a=>{
-        const li = document.createElement('li');
-        li.innerText="Packet "+a;
-        li.classList.add('anomaly');
-        list.appendChild(li);
-    });
-
+    drawGraph(data);
     showPage('resultPage');
+}
+
+function drawGraph(data){
+    const c=document.getElementById('graph');
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+
+    ctx.strokeStyle="#00e6ff";
+    ctx.beginPath();
+
+    let step=c.width/(data.length-1);
+    data.forEach((v,i)=>{
+        let x=i*step;
+        let y=c.height-(v*20);
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
 }
 </script>
 
