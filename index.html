@@ -177,29 +177,25 @@ function login(){
     showPage('dashboard');
 }
 
-function analyzeFile(){
-    const file=document.getElementById('pcapFile').files[0];
-    if(!file){alert("Select a PCAP file");return;}
-
-    document.getElementById('resultFileName').innerText=file.name;
-    const list=document.getElementById('anomalyList');
-    list.innerHTML="";
-
-    let data=[];
-    for(let i=1;i<=20;i++){
-        let score=Math.floor(Math.random()*10);
-        data.push(score);
-        if(score>6){
-            let li=document.createElement('li');
-            li.innerText="High anomaly score at packet "+i;
-            list.appendChild(li);
-        }
+async function analyzeFile(){
+    const fileInput = document.getElementById("pcapFile");
+    if(!fileInput.files.length){
+        alert("Select a PCAP file");
+        return;
     }
-    if(list.innerHTML==="") list.innerHTML="<li>No anomalies detected</li>";
 
-    drawGraph(data);
-    showPage('resultPage');
+    const formData = new FormData();
+    formData.append("pcap", fileInput.files[0]);
+
+    const res = await fetch("http://127.0.0.1:5000/analyze", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+    alert("Backend response: " + data.message);
 }
+
 
 function drawGraph(data){
     const c=document.getElementById('graph');
@@ -222,3 +218,4 @@ function drawGraph(data){
 
 </body>
 </html>
+
