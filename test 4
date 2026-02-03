@@ -16,7 +16,7 @@ body{
     color:#fff;
 }
 
-/* ===== Navbar ===== */
+/* Navbar */
 .navbar{
     height:60px;
     background:#000;
@@ -26,11 +26,7 @@ body{
     padding:0 30px;
     border-bottom:1px solid #444;
 }
-.logo{
-    font-size:20px;
-    font-weight:bold;
-    letter-spacing:2px;
-}
+.logo{font-size:20px;font-weight:bold}
 .menu a{
     color:#ccc;
     margin-left:20px;
@@ -38,64 +34,39 @@ body{
     padding:8px 14px;
     border-radius:6px;
 }
-.menu a:hover{
-    background:#fff;
-    color:#000;
-}
+.menu a:hover{background:#fff;color:#000}
 
-/* ===== Main ===== */
-.main{
-    padding:30px;
-}
-
-/* ===== Card ===== */
+/* Layout */
+.main{padding:30px}
 .card{
-    max-width:420px;
-    margin:80px auto;
+    max-width:900px;
+    margin:auto;
     background:#111;
-    padding:30px;
-    border-radius:14px;
+    padding:25px;
+    border-radius:10px;
+    margin-bottom:30px;
     border:1px solid #333;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    transform-style: preserve-3d;
 }
-.card h2{
-    text-align:center;
-}
-
-/* ===== Inputs ===== */
-input{
-    width:100%;
-    margin:12px 0;
-    padding:12px;
-    background:#000;
-    color:#fff;
-    border:1px solid #fff;
-    border-radius:6px;
-}
-button{
-    width:100%;
-    margin-top:10px;
-    padding:12px;
-    background:#fff;
-    color:#000;
-    border:none;
-    border-radius:6px;
-    font-weight:bold;
-    cursor:pointer;
-}
-button:hover{
-    background:#ccc;
-}
-
-.error{
-    color:#ff2b2b;
-    font-weight:bold;
-    text-align:center;
-}
-
-/* ===== Utilities ===== */
 .hidden{display:none}
+
+input,button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:6px;
+}
+input{background:#000;color:#fff;border:1px solid #fff}
+button{background:#fff;color:#000;font-weight:bold;cursor:pointer}
+button:hover{background:#ccc}
+
+.error{color:#ff2b2b;font-weight:bold}
+
+/* ⭐ CRITICAL FIX */
+canvas{
+    margin-top:20px;
+    width:100% !important;
+    height:350px !important;
+}
 </style>
 </head>
 
@@ -103,80 +74,163 @@ button:hover{
 
 <div class="navbar">
     <div class="logo">PCAPIFY</div>
-    <div class="menu hidden" id="mainMenu">
-        <a href="#" onclick="logout()">Logout</a>
+    <div class="menu hidden" id="menu">
+        <a onclick="showPage('dashboard')">Dashboard</a>
+        <a onclick="showPage('upload')">Upload</a>
+        <a onclick="showPage('results')">Results</a>
+        <a onclick="logout()">Logout</a>
     </div>
 </div>
 
 <div class="main">
 
-<!-- ===== Login ===== -->
 <div id="login" class="card">
     <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <p id="loginError" class="error hidden">Invalid username or password</p>
+    <p id="loginErr" class="error hidden">Invalid credentials</p>
+</div>
+
+<div id="dashboard" class="card hidden">
+    <h2>Dashboard</h2>
+    <p>PCAP file anomaly analysis system</p>
+    <p><b>Total Logins:</b> <span id="count">0</span></p>
+</div>
+
+<div id="upload" class="card hidden">
+    <h2>Upload PCAP</h2>
+    <input type="file" id="pcap">
+    <button onclick="analyze()">Analyze</button>
+    <p id="fileErr" class="error hidden">Select a file</p>
+</div>
+
+<div id="results" class="card hidden">
+    <h2>Results</h2>
+    <ul id="list"></ul>
+
+    <h3>Line Graph</h3>
+    <canvas id="lineChart"></canvas>
+
+    <h3>Pie Chart</h3>
+    <canvas id="pieChart"></canvas>
 </div>
 
 </div>
 
 <script>
-/* ===== 3D Cursor Tilt Effect ===== */
-const loginCard = document.getElementById("login");
+let lineChart, pieChart;
 
-loginCard.addEventListener("mousemove", (e) => {
-    const rect = loginCard.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
 
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateX = -(y - centerY) / 12;
-    const rotateY = (x - centerX) / 12;
-
-    loginCard.style.transform = `
-        perspective(1000px)
-        scale(1.06)
-        rotateX(${rotateX}deg)
-        rotateY(${rotateY}deg)
-    `;
-
-    loginCard.style.boxShadow = `
-        0 30px 60px rgba(0,0,0,0.9),
-        0 0 35px rgba(255,255,255,0.15)
-    `;
-});
-
-loginCard.addEventListener("mouseleave", () => {
-    loginCard.style.transform = `
-        perspective(1000px)
-        scale(1)
-        rotateX(0deg)
-        rotateY(0deg)
-    `;
-    loginCard.style.boxShadow = `0 15px 30px rgba(0,0,0,0.7)`;
-});
-
-/* ===== Login Logic ===== */
 function login(){
-    const user=document.getElementById('username').value;
-    const pass=document.getElementById('password').value;
-    const error=document.getElementById('loginError');
+    if(user.value==="admin" && pass.value==="admin"){
+        menu.classList.remove('hidden');
 
-    if(user==="admin" && pass==="admin"){
-        error.classList.add('hidden');
-        document.getElementById('mainMenu').classList.remove('hidden');
-        alert("Login Successful");
-    }else{
-        error.classList.remove('hidden');
+        let c = Number(localStorage.getItem("loginCount") || 0) + 1;
+        localStorage.setItem("loginCount",c);
+        count.innerText = c;
+
+        showPage('dashboard');
+        loginErr.classList.add('hidden');
+    } else {
+        loginErr.classList.remove('hidden');
     }
 }
 
 function logout(){
-    document.getElementById('mainMenu').classList.add('hidden');
+    menu.classList.add('hidden');
+    showPage('login');
 }
+
+function analyze(){
+    if(!pcap.files.length){
+        fileErr.classList.remove('hidden');
+        return;
+    }
+    fileErr.classList.add('hidden');
+
+    let data=[], high=0, normal=0;
+    list.innerHTML="";
+
+    for(let i=1;i<=20;i++){
+        let s=Math.floor(Math.random()*10);
+        data.push(s);
+        if(s>6){
+            high++;
+            list.innerHTML+=`<li class="error">High anomaly at packet ${i}</li>`;
+        } else normal++;
+    }
+
+    showPage('results');
+
+    setTimeout(()=>{
+        drawLine(data);
+        drawPie(high,normal);
+    },150);
+}
+
+function drawLine(data){
+    if(lineChart) lineChart.destroy();
+
+    lineChart = new Chart(lineChartCanvas,{
+        type:"line",
+        data:{
+            labels:data.map((_,i)=>"Pkt "+(i+1)),
+            datasets:[{
+                label:"Anomaly Score",
+                data:data,
+                borderColor:"#00e6ff",
+                backgroundColor:"rgba(0,230,255,.2)",
+                tension:.4,
+                pointRadius:5
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            scales:{
+                x:{ticks:{color:"#fff"}},
+                y:{ticks:{color:"#fff"},beginAtZero:true,max:10}
+            },
+            plugins:{legend:{labels:{color:"#fff"}}}
+        }
+    });
+}
+
+function drawPie(a,n){
+    if(pieChart) pieChart.destroy();
+
+    pieChart = new Chart(pieChartCanvas,{
+        type:"pie",
+        data:{
+            labels:["High","Normal"],
+            datasets:[{
+                data:[a,n],
+                backgroundColor:["#ff2b2b","#00e6ff"]
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{labels:{color:"#fff"}}}
+        }
+    });
+}
+
+const user=document.getElementById("user");
+const pass=document.getElementById("pass");
+const menu=document.getElementById("menu");
+const loginErr=document.getElementById("loginErr");
+const pcap=document.getElementById("pcap");
+const fileErr=document.getElementById("fileErr");
+const list=document.getElementById("list");
+const count=document.getElementById("count");
+const lineChartCanvas=document.getElementById("lineChart");
+const pieChartCanvas=document.getElementById("pieChart");
 </script>
 
 </body>
