@@ -88,13 +88,14 @@ canvas{
 
 <body>
 
-<div class="navbar">
+<!-- NAVBAR (hidden until login) -->
+<div class="navbar hidden" id="navbar">
     <div class="logo">PCAP Anomaly Analyzer</div>
     <div class="menu">
         <a href="#" onclick="showPage('uploadPage')">Upload</a>
         <a href="#" onclick="showPage('resultPage')">Results</a>
         <a href="#" onclick="showPage('about')">About</a>
-        <a href="#" onclick="showPage('login')">Logout</a>
+        <a href="#" onclick="logout()">Logout</a>
     </div>
 </div>
 
@@ -131,12 +132,16 @@ canvas{
 <!-- ABOUT -->
 <div id="about" class="card hidden">
     <h2>About</h2>
-    <p>PCAP Anomaly Analyzer detects suspicious network traffic patterns for cybersecurity analysis.</p>
+    <p>
+        PCAP Anomaly Analyzer is a cybersecurity tool used to analyze
+        packet capture files and identify suspicious traffic patterns.
+    </p>
 </div>
 
 </div>
 
 <script>
+/* Page Control */
 function showPage(id){
     document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
@@ -144,10 +149,17 @@ function showPage(id){
 
 /* Login → Upload */
 function login(){
+    document.getElementById('navbar').classList.remove('hidden');
     showPage('uploadPage');
 }
 
-/* Analyze */
+/* Logout */
+function logout(){
+    document.getElementById('navbar').classList.add('hidden');
+    showPage('login');
+}
+
+/* Analyze PCAP (Demo Logic) */
 function analyzeFile(){
     const file=document.getElementById('pcapFile').files[0];
     if(!file){alert("Select a PCAP file");return;}
@@ -174,7 +186,7 @@ function analyzeFile(){
     showPage('resultPage');
 }
 
-/* High-Def Line Graph */
+/* High-Definition Line Graph */
 function drawGraph(data){
     const c=document.getElementById('graph');
     const ctx=c.getContext('2d');
@@ -208,7 +220,7 @@ function drawGraph(data){
     ctx.stroke();
 }
 
-/* High-Def Pie Chart */
+/* High-Definition Pie Chart */
 function drawPie(anomaly, normal){
     const c=document.getElementById('pie');
     const ctx=c.getContext('2d');
@@ -240,6 +252,9 @@ function drawPie(anomaly, normal){
     ctx.fillStyle="#ff5252";
     ctx.fillRect(395,190,15,15);
 }
+
+/* Force Login First */
+showPage('login');
 </script>
 
 </body>
