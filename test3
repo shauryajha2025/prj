@@ -60,4 +60,252 @@ body{
 
 /* ===== LOGIN 3D CARD ===== */
 .login-3d{
-    max-width:420
+    max-width:420px;
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+    transform-style:preserve-3d;
+}
+.login-3d:hover{
+    box-shadow:0 30px 60px rgba(255,255,255,0.25);
+}
+
+.card h2{
+    margin-top:0;
+}
+
+/* ===== Inputs & Buttons ===== */
+input, button{
+    padding:10px;
+    border-radius:6px;
+}
+input{
+    width:100%;
+    margin:10px 0;
+    background:#000;
+    color:#fff;
+    border:1px solid #fff;
+}
+button{
+    background:#fff;
+    color:#000;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+button:hover{
+    background:#ccc;
+}
+
+/* ===== Error ===== */
+.error{
+    color:#ff2b2b;
+    font-weight:bold;
+}
+
+/* ===== Graph ===== */
+canvas{
+    width:100%;
+    background:#000;
+    border:1px solid #fff;
+    border-radius:8px;
+    margin-top:20px;
+}
+
+/* ===== Utilities ===== */
+.hidden{display:none}
+ul{margin-left:20px}
+
+/* ===== Dashboard About Box ===== */
+.about-box{
+    margin-top:20px;
+    padding:15px;
+    background:#000;
+    border:1px solid #444;
+    border-radius:10px;
+}
+.about-box h3{
+    margin-top:0;
+    color:#ff2b2b;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== Navbar ===== -->
+<div class="navbar">
+    <div class="logo">PCAPIFY</div>
+    <div class="menu hidden" id="mainMenu">
+        <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+        <a href="#" onclick="showPage('uploadPage')">Upload</a>
+        <a href="#" onclick="showPage('resultPage')">Results</a>
+        <a href="#" onclick="showPage('about')">About</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="main">
+
+<!-- ===== Login ===== -->
+<div id="login" class="card login-3d">
+    <h2>Login to PCAPIFY</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="loginError" class="error hidden">Invalid username or password</p>
+</div>
+
+<!-- ===== Dashboard ===== -->
+<div id="dashboard" class="card hidden">
+    <h2>System Overview</h2>
+    <p>
+        PCAPIFY analyzes <b>PCAP (Packet Capture)</b> files to detect
+        anomalous or suspicious network traffic.
+    </p>
+
+    <ul>
+        <li>Abnormal traffic detection</li>
+        <li>Intrusion attempt identification</li>
+        <li>Network security visibility</li>
+    </ul>
+
+    <p><b>Total logins:</b> <span id="loginCount">0</span></p>
+
+    <!-- About inside dashboard -->
+    <div class="about-box">
+        <h3>About PCAPIFY</h3>
+        <p>
+            PCAPIFY is a lightweight cybersecurity tool designed for
+            anomaly detection, network forensics, and SOC-level analysis
+            of packet capture files.
+        </p>
+    </div>
+</div>
+
+<!-- ===== Upload ===== -->
+<div id="uploadPage" class="card hidden">
+    <h2>Upload PCAP File</h2>
+    <input type="file" id="pcapFile" accept=".pcap">
+    <button onclick="analyzeFile()">Analyze</button>
+    <p id="fileError" class="error hidden">Please select a PCAP file</p>
+</div>
+
+<!-- ===== Results ===== -->
+<div id="resultPage" class="card hidden">
+    <h2>Analysis Results</h2>
+    <p><b>File:</b> <span id="resultFileName"></span></p>
+    <ul id="anomalyList"></ul>
+    <h3>Traffic Anomaly Graph</h3>
+    <canvas id="graph" height="250"></canvas>
+</div>
+
+<!-- ===== About Page ===== -->
+<div id="about" class="card hidden">
+    <h2>About PCAPIFY</h2>
+    <ul>
+        <li>Intrusion Detection Systems (IDS)</li>
+        <li>Network Forensics</li>
+        <li>Security Operations Center (SOC)</li>
+    </ul>
+</div>
+
+</div>
+
+<script>
+/* ===== Page Navigation ===== */
+function showPage(id){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+/* ===== Login ===== */
+function login(){
+    const user=username.value;
+    const pass=password.value;
+
+    if(user==="admin" && pass==="admin"){
+        loginError.classList.add('hidden');
+        mainMenu.classList.remove('hidden');
+
+        let count=localStorage.getItem("loginCount")||0;
+        count++;
+        localStorage.setItem("loginCount",count);
+        loginCount.innerText=count;
+
+        showPage('dashboard');
+    }else{
+        loginError.classList.remove('hidden');
+    }
+}
+
+function logout(){
+    mainMenu.classList.add('hidden');
+    username.value="";
+    password.value="";
+    showPage('login');
+}
+
+/* ===== Analyze ===== */
+function analyzeFile(){
+    const file=pcapFile.files[0];
+    if(!file){
+        fileError.classList.remove('hidden');
+        return;
+    }
+    fileError.classList.add('hidden');
+
+    resultFileName.innerText=file.name;
+    anomalyList.innerHTML="";
+    let data=[];
+
+    for(let i=1;i<=20;i++){
+        let score=Math.floor(Math.random()*10);
+        data.push(score);
+        if(score>6){
+            let li=document.createElement("li");
+            li.innerHTML="<span class='error'>High anomaly</span> at packet "+i;
+            anomalyList.appendChild(li);
+        }
+    }
+    if(!anomalyList.innerHTML) anomalyList.innerHTML="<li>No anomalies detected</li>";
+    drawGraph(data);
+    showPage('resultPage');
+}
+
+/* ===== Graph ===== */
+function drawGraph(data){
+    const c=graph;
+    const ctx=c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle="#fff";
+    ctx.beginPath();
+
+    let step=c.width/(data.length-1);
+    data.forEach((v,i)=>{
+        let x=i*step;
+        let y=c.height-(v*20);
+        i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    });
+    ctx.stroke();
+}
+
+/* ===== 3D CURSOR EFFECT (LOGIN ONLY) ===== */
+const card=document.querySelector(".login-3d");
+
+card.addEventListener("mousemove",e=>{
+    const rect=card.getBoundingClientRect();
+    const x=e.clientX-rect.left;
+    const y=e.clientY-rect.top;
+
+    const rotateX=-(y-rect.height/2)/15;
+    const rotateY=(x-rect.width/2)/15;
+
+    card.style.transform=`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+});
+
+card.addEventListener("mouseleave",()=>{
+    card.style.transform="perspective(1000px) rotateX(0deg) rotateY(0deg)";
+});
+</script>
+
+</body>
+</html>
