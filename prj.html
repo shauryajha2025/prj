@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Analyzer | Enterprise Edition</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+    <style>
+        :root { --primary: #00ff88; --danger: #ff0055; --bg: #0b0c15; --card: #151621; --text: #e0e0e0; }
+        body { font-family: 'Segoe UI', monospace; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Navigation */
+        nav { background: rgba(21, 22, 33, 0.95); padding: 1rem 2rem; display: flex; justify-content: space-between; border-bottom: 1px solid #333; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); letter-spacing: 2px; }
+        .btn-nav { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 16px; cursor: pointer; margin-left: 10px; transition: 0.3s; }
+        .btn-nav:hover { background: var(--primary); color: #000; }
+        .hidden { display: none !important; }
+
+        /* Layout */
+        .page { display: none; padding: 2rem; flex: 1; align-items: center; justify-content: center; flex-direction: column; animation: fadeIn 0.5s; }
+        .page.active { display: flex; }
+        
+        /* Forms */
+        .card { background: var(--card); padding: 2rem; border-radius: 12px; border: 1px solid #333; width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        .btn-action { width: 100%; padding: 12px; background: var(--primary); border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* Dashboard */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 1000px; }
+        .upload-zone { border: 2px dashed #444; padding: 2rem; text-align: center; cursor: pointer; grid-column: 1 / -1; }
+        .terminal { background: #000; font-family: 'Courier New', monospace; padding: 1rem; height: 300px; overflow-y: auto; border: 1px solid #333; color: var(--primary); text-align: left; }
+        .chart-container { background: var(--card); padding: 1rem; border: 1px solid #333; display: flex; align-items: center; justify-content: center; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">NET.GUARD AI</div>
+        <div id="nav-buttons">
+            <button class="btn-nav" onclick="app.showPage('login')">Login</button>
+        </div>
+    </nav>
+
+    <div id="login" class="page active">
+        <div class="card">
+            <h2>Secure Access</h2>
+            <p>Authenticated via Google Identity Platform</p>
+            <input type="email" id="email" placeholder="admin@company.com">
+            <input type="password" id="password" placeholder="••••••••">
+            <button class="btn-action" onclick="app.login()">Authenticate</button>
+            <p id="login-error" style="color:var(--danger); font-size: 0.9rem; margin-top:10px;"></p>
+        </div>
+    </div>
+
+    <div id="dashboard" class="page">
+        <div class="dashboard-grid">
+            <div class="upload-zone" onclick="document.getElementById('csvInput').click()">
+                <h3>📂 Upload Traffic Logs (CSV)</h3>
+                <p>Auto-scan enabled: SQL Injection, XSS, & Bad IPs</p>
+                <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="app.processFile()">
+            </div>
+
+            <div class="terminal" id="terminal">
+                > System initialized...<br>
+                > WAF (Web Application Firewall) Rules loaded.<br>
+                > Waiting for data stream...
+            </div>
+
+            <div class="chart-container">
+                <canvas id="securityChart"></canvas>
+            </div>
+        </div>
+        <button class="btn-nav" style="margin-top: 20px; border-color: var(--danger); color: var(--danger)" onclick="app.logout()">Secure Logout</button>
+    </div>
+
+    <script>
+        // --- 1. FIREBASE CONFIGURATION (ACTION REQUIRED) ---
+        // TODO: Paste your config here from Firebase Console!
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch (e) {
+            console.error("Firebase not configured correctly. Login will fail until keys are added.");
+        }
+
+        // --- 2. APPLICATION LOGIC ---
+        const app = {
+            // Navigation
+            showPage: (id) => {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+            },
+
+            // Authentication
+            login: () => {
+                const e = document.getElementById('email').value;
+                const p = document.getElementById('password').value;
+                const errBox = document.getElementById('login-error');
+
+                // If user didn't paste keys, show alert
+                if(firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
+                    alert("⚠️ SYSTEM ERROR: Firebase Keys Missing.\nPlease edit the HTML file and add your Firebase Config.");
+                    return;
+                }
+
+                firebase.auth().signInWithEmailAndPassword(e, p)
+                    .then((userCredential) => {
+                        app.log(User ${userCredential.user.email} authenticated.);
+                        app.showPage('dashboard');
+                        document.getElementById('nav-buttons').innerHTML = <span style='color:white; margin-right:10px'>Welcome, ${userCredential.user.email}</span>;
+                    })
+                    .catch((error) => {
+                        errBox.innerText = "Access Denied: " + error.message;
+                        app.log("Auth failed: " + error.message);
+                    });
+            },
+
+            logout: () => {
+                firebase.auth().signOut().then(() => {
+                    location.reload();
+                });
+            },
+
+            // Terminal Helper
+            log: (msg) => {
+                const term = document.getElementById('terminal');
+                const time = new Date().toLocaleTimeString();
+                term.innerHTML += > [${time}] ${msg}<br>;
+                term.scrollTop = term.scrollHeight;
+            },
+
+            // --- 3. COMPLEX ANALYSIS (REGEX & CHARTS) ---
+            processFile: () => {
+                const file = document.getElementById('csvInput').files[0];
+                if (!file) return;
+
+                app.log(Reading ${file.name} (${file.size} bytes)...);
+                const reader = new FileReader();
+                reader.onload = (e) => app.analyzeData(e.target.result);
+                reader.readAsText(file);
+            },
+
+            analyzeData: (csvText) => {
+                app.log("Parsing packet headers...");
+                const lines = csvText.split('\n');
+                
+                // DATA STORE
+                let stats = { safe: 0, sqlInjection: 0, badIP: 0, malware: 0 };
+                let total = 0;
+
+                // REGEX PATTERNS (The "Complex" Part)
+                const regexIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/; 
+                const regexSQL = /(\%27)|(\')|(\-\-)|(\%23)|(#)|(DROP TABLE)|(UNION SELECT)/i;
+                const regexXSS = /(<script>)|(javascript:)|(onerror=)/i;
+
+                lines.forEach((line, index) => {
+                    if(line.length < 5) return; // Skip empty lines
+                    total++;
+                    let isSafe = true;
+
+                    // 1. Check SQL Injection
+                    if (regexSQL.test(line)) {
+                        stats.sqlInjection++;
+                        isSafe = false;
+                        app.log(⚠️ Packet #${index}: SQL Injection detected);
+                    }
+                    // 2. Check XSS/Malware
+                    else if (regexXSS.test(line) || line.toLowerCase().includes('malware')) {
+                        stats.malware++;
+                        isSafe = false;
+                        app.log(⚠️ Packet #${index}: Malicious Payload (XSS/Malware));
+                    }
+                    // 3. Check IP Format (Simplified for demo)
+                    // In a real CSV, you'd extract the specific column. Here we scan the whole line.
+                    // If we find an IP starting with '192.168.66' we assume it's a "Bad Actor" subnet
+                    else if (line.includes('192.168.66')) {
+                        stats.badIP++;
+                        isSafe = false;
+                        app.log(⚠️ Packet #${index}: Blacklisted Subnet);
+                    }
+
+                    if (isSafe) stats.safe++;
+                });
+
+                app.log(Scan Complete. Processed ${total} packets.);
+                app.renderChart(stats);
+            },
+
+            // CHART.JS RENDERING
+            renderChart: (stats) => {
+                const ctx = document.getElementById('securityChart').getContext('2d');
+                
+                // Destroy previous chart if exists
+                if(window.myChart) window.myChart.destroy();
+
+                window.myChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Safe Traffic', 'SQL Injection', 'Bad IPs', 'Malware'],
+                        datasets: [{
+                            data: [stats.safe, stats.sqlInjection, stats.badIP, stats.malware],
+                            backgroundColor: ['#00ff88', '#ff9f43', '#ff0055', '#5f27cd'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: 'white' } },
+                            title: { display: true, text: 'Threat Distribution Analysis', color: 'white' }
+                        }
+                    }
+                });
+            }
+        };
+    </script>
+</body>
+</html>
