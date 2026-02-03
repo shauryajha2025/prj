@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>PCAPIFY</title>
 
-<!-- Chart.js CDN -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -18,7 +18,7 @@ body{
     perspective:1200px;
 }
 
-/* ===== Top Navbar ===== */
+/* ===== Navbar ===== */
 .navbar{
     height:60px;
     background:#000;
@@ -29,19 +29,5 @@ body{
     border-bottom:1px solid #444;
 }
 
-.navbar .logo{
-    color:#fff;
+.logo{
     font-size:22px;
-    font-weight:bold;
-    letter-spacing:2px;
-    transition:transform .4s, text-shadow .4s;
-}
-.navbar .logo:hover{
-    transform:translateZ(25px) scale(1.1);
-    text-shadow:0 0 15px #00e6ff;
-}
-
-.navbar .menu a{
-    color:#ccc;
-    margin-left:20px;
-    text-decoration:none;
