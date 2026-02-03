@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetGuard AI | PCAP Anomaly Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --dark-bg: #1a2530;
+            --text-color: #333;
+            --light-text: #f8f9fa;
+            --border-color: #ddd;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .logo i {
+            color: var(--secondary-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        nav a:hover {
+            color: var(--secondary-color);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info i {
+            font-size: 1.2rem;
+        }
+        
+        .page {
+            display: none;
+            min-height: calc(100vh - 140px);
+            padding: 2rem 0;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background-color: rgba(39, 174, 96, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--accent-color);
+            color: #721c24;
+        }
+        
+        .alert-warning {
+            background-color: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid var(--warning-color);
+            color: #856404;
+        }
+        
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--secondary-color);
+        }
+        
+        .file-upload i {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-list {
+            margin-top: 1rem;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            background-color: var(--light-bg);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-name {
+            font-weight: 500;
+        }
+        
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .stat-icon.primary {
+            background-color: var(--secondary-color);
+        }
+        
+        .stat-icon.danger {
+            background-color: var(--accent-color);
+        }
+        
+        .stat-icon.success {
+            background-color: var(--success-color);
+        }
+        
+        .stat-icon.warning {
+            background-color: var(--warning-color);
+        }
+        
+        .stat-info h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .stat-info p {
+            color: #666;
+        }
+        
+        .anomaly-results {
+            margin-top: 2rem;
+        }
+        
+        .result-item {
+            border-left: 5px solid var(--accent-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: var(--shadow);
+        }
+        
+        .result-item.suspicious {
+            border-left-color: var(--warning-color);
+        }
+        
+        .result-item.normal {
+            border-left-color: var(--success-color);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .result-severity {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .severity-high {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--accent-color);
+        }
+        
+        .severity-medium {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .severity-low {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--secondary-color);
+        }
+        
+        .result-details {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            background-color: var(--light-bg);
+            padding: 0.8rem;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .admin-control-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        footer {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+        
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .footer-links a {
+            color: var(--light-text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--secondary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        
+        /* Loading animation */
+        .loader {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>NetGuard AI</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" data-page="home" class="nav-link">Home</a></li>
+                    <li><a href="#" data-page="upload" class="nav-link">Upload PCAP</a></li>
+                    <li><a href="#" data-page="results" class="nav-link">Detection Results</a></li>
+                    <li><a href="#" data-page="admin" class="nav-link admin-only">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="username">User</span>
+                <a href="#" id="logout-btn" class="btn btn-danger" style="padding: 0.5rem 1rem;">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- User Home Page -->
+        <section id="home-page" class="page active">
+            <h1 class="page-title">Dashboard Overview</h1>
+            
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="files-uploaded">0</h3>
+                        <p>PCAP Files Uploaded</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="anomalies-detected">0</h3>
+                        <p>Anomalies Detected</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="normal-packets">0</h3>
+                        <p>Normal Packets</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="last-analysis">--</h3>
+                        <p>Last Analysis</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-info-circle"></i> How It Works</h2>
+                <p>NetGuard AI uses advanced machine learning algorithms to analyze PCAP (Packet Capture) files and detect network anomalies.</p>
+                <ol style="margin-left: 1.5rem; margin-top: 1rem;">
+                    <li>Upload your PCAP files using the "Upload PCAP" page</li>
+                    <li>Our system processes the files using ML models trained on normal/abnormal network traffic patterns</li>
+                    <li>View detailed anomaly reports on the "Detection Results" page</li>
+                    <li>Export results for further investigation</li>
+                </ol>
+                
+                <div style="margin-top: 1.5rem;">
+                    <a href="#" data-page="upload" class="btn nav-link">
+                        <i class="fas fa-upload"></i> Upload PCAP Files
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-history"></i> Recent Activity</h2>
+                <div id="recent-activity">
+                    <p>No recent activity. Upload a PCAP file to get started.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upload PCAP Page -->
+        <section id="upload-page" class="page">
+            <h1 class="page-title">Upload PCAP Files</h1>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-cloud-upload-alt"></i> Upload Files</h2>
+                <p>Select one or more PCAP files for anomaly detection analysis. Maximum file size: 100MB each.</p>
+                
+                <div class="file-upload" id="drop-area">
+                    <i class="fas fa-file-archive"></i>
+                    <h3>Drag & Drop PCAP Files Here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="file-input" accept=".pcap,.pcapng" multiple style="display: none;">
+                </div>
+                
+                <div class="file-list" id="file-list">
+                    <!-- File items will be added here dynamically -->
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Analysis Name (Optional)</label>
+                    <input type="text" id="analysis-name" class="form-control" placeholder="e.g., Wednesday Network Traffic">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Detection Sensitivity</label>
+                    <select id="sensitivity" class="form-control">
+                        <option value="low">Low (Fewer false positives)</option>
+                        <option value="medium" selected>Medium (Balanced)</option>
+                        <option value="high">High (More aggressive detection)</option>
+                    </select>
+                </div>
+                
+                <button id="analyze-btn" class="btn btn-success btn-block">
+                    <i class="fas fa-play-circle"></i> Start Anomaly Detection Analysis
+                </button>
+                
+                <div id="upload-progress" class="hidden" style="margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Processing files...</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div style="height: 10px; background-color: #eee; border-radius: 5px; overflow: hidden;">
+                        <div id="progress-bar" style="height: 100%; width: 0%; background-color: var(--success-color); transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-lightbulb"></i> Tips for Best Results</h2>
+                <ul style="margin-left: 1.5rem;">
+                    <li>Ensure PCAP files contain complete packet captures for accurate analysis</li>
+                    <li>For large files, consider splitting them into smaller time segments</li>
+                    <li>Include both normal and suspicious traffic for model calibration</li>
+                    <li>Check that timestamps are accurate in your capture files</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Detection Results Page -->
+        <section id="results-page" class="page">
+            <h1 class="page-title">Anomaly Detection Results</h1>
+            
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 class="card-title" style="margin-bottom: 0;"><i class="fas fa-chart-bar"></i> Detection Summary</h2>
+                    <div>
+                        <button id="export-results" class="btn">
+                            <i class="fas fa-download"></i> Export Results
+                        </button>
+                        <button id="refresh-results" class="btn btn-success">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="anomaly-results" id="anomaly-results-container">
+                    <!-- Anomaly results will be displayed here -->
+                    <div class="result-item">
+                        <div class="result-header">
+                            <div class="result-title">No analysis results yet</div>
+                            <div class="result-severity severity-low">INFO</div>
+                        </div>
+                        <p>Upload and analyze PCAP files to see anomaly detection results here.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-filter"></i> Filter Results</h2>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn filter-btn active" data-severity="all">All</button>
+                    <button class="btn filter-btn" data-severity="high">High Severity</button>
+                    <button class="btn filter-btn" data-severity="medium">Medium Severity</button>
+                    <button class="btn filter-btn" data-severity="low">Low Severity</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Page -->
+        <section id="admin-page" class="page">
+            <h1 class="page-title">Admin Dashboard</h1>
+            
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>Admin functions are restricted to authorized users only.</div>
+            </div>
+            
+            <div class="admin-controls">
+                <div class="admin-control-card">
+                    <h2 class="card-title"><i class="fas fa-cogs"></i> ML Model Management</h2>
+                    <p>Update and retrain machine learning models for improved anomaly detection.</p>
+                    <div style="margin-top: 1.5rem;">
+                        <button id="retrain-models" class="btn btn-warning">
+                            <i class="fas fa-brain"></i> Retrain Models
+                        </button>
+                        <button id="model-status" class="btn" style="margin-top: 0.5rem;">
+                            <i class="fas fa-chart-line"></i> View Model Performance
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="admin-control-card">
+                    <h2 class="card-title"><i class="fas fa-users"></i> User Management</h2>
+                    <p>Manage user accounts and access permissions.</p>
+                    <div style="margin-top: 1.5rem;">
+                        <button id="view-users" class="btn">
+                            <i class="fas fa-list"></i> View All Users
+                        </button>
+                        <button id="add-user" class="btn btn-success" style="margin-top: 0.5rem;">
+                            <i class="fas fa-user-plus"></i> Add New User
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="admin-control-card">
+                    <h2 class="card-title"><i class="fas fa-database"></i> System Logs</h2>
+                    <p>View system logs and analysis history.</p>
+                    <div style="margin-top: 1.5rem;">
+                        <button id="view-logs" class="btn">
+                            <i class="fas fa-clipboard-list"></i> View Logs
+                        </button>
+                        <button id="clear-logs" class="btn btn-danger" style="margin-top: 0.5rem;">
+                            <i class="fas fa-trash"></i> Clear Old Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 2rem;">
+                <h2 class="card-title"><i class="fas fa-chart-pie"></i> System Statistics</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <h3>Storage Usage</h3>
+                        <div style="height: 10px; background-color: #eee; border-radius: 5px; margin-top: 0.5rem; overflow: hidden;">
+                            <div style="height: 100%; width: 65%; background-color: var(--secondary-color);"></div>
+                        </div>
+                        <p style="margin-top: 0.5rem;">65% used (32.5GB of 50GB)</p>
+                    </div>
+                    <div>
+                        <h3>Active Users</h3>
+                        <p style="font-size: 2rem; font-weight: bold; color: var(--secondary-color);">24</p>
+                    </div>
+                    <div>
+                        <h3>Models Trained</h3>
+                        <p style="font-size: 2rem; font-weight: bold; color: var(--success-color);">8</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Page -->
+        <section id="login-page" class="page active">
+            <div style="max-width: 500px; margin: 0 auto;">
+                <div class="card">
+                    <h1 class="page-title" style="text-align: center; width: 100%;">Login</h1>
+                    
+                    <div id="login-alert" class="alert alert-danger hidden">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div id="login-alert-text">Invalid credentials. Please try again.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="login-username" class="form-control" placeholder="Enter your username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <input type="checkbox" id="remember-me">
+                            <label for="remember-me">Remember me</label>
+                        </div>
+                        <a href="#" id="forgot-password">Forgot password?</a>
+                    </div>
+                    
+                    <button id="login-btn" class="btn btn-block">Login</button>
+                    
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <p>Admin login? <a href="#" id="admin-login-link">Click here</a></p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h2 class="card-title" style="text-align: center;"><i class="fas fa-shield-alt"></i> Secure Authentication</h2>
+                    <p style="text-align: center;">NetGuard AI uses industry-standard encryption and security protocols to protect your data.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Login Page -->
+        <section id="admin-login-page" class="page">
+            <div style="max-width: 500px; margin: 0 auto;">
+                <div class="card">
+                    <h1 class="page-title" style="text-align: center; width: 100%;">Admin Login</h1>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>Restricted area. Authorized personnel only.</div>
+                    </div>
+                    
+                    <div id="admin-login-alert" class="alert alert-danger hidden">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div id="admin-login-alert-text">Invalid admin credentials.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Admin Username</label>
+                        <input type="text" id="admin-username" class="form-control" placeholder="Enter admin username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="admin-password" class="form-control" placeholder="Enter admin password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">2FA Code (if enabled)</label>
+                        <input type="text" id="admin-2fa" class="form-control" placeholder="Enter 2FA code">
+                    </div>
+                    
+                    <button id="admin-login-btn" class="btn btn-block btn-warning">Admin Login</button>
+                    
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <p>Regular user? <a href="#" id="regular-login-link">Back to user login</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-container">
+            <div>
+                <p>&copy; 2023 NetGuard AI. All rights reserved.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Documentation</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Current user state
+        let currentUser = null;
+        let isAdmin = false;
+        let uploadedFiles = [];
+        let analysisResults = [];
+        
+        // DOM Elements
+        const pages = {
+            home: document.getElementById('home-page'),
+            upload: document.getElementById('upload-page'),
+            results: document.getElementById('results-page'),
+            admin: document.getElementById('admin-page'),
+            login: document.getElementById('login-page'),
+            adminLogin: document.getElementById('admin-login-page')
+        };
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in (in a real app, this would check cookies/tokens)
+            const isLoggedIn = localStorage.getItem('netguardLoggedIn') === 'true';
+            const isAdminUser = localStorage.getItem('netguardIsAdmin') === 'true';
+            
+            if (isLoggedIn) {
+                currentUser = localStorage.getItem('netguardUsername') || 'User';
+                isAdmin = isAdminUser;
+                showUserPages();
+            } else {
+                showLoginPage();
+            }
+            
+            // Set up event listeners
+            setupEventListeners();
+            updateStats();
+        });
+        
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    navigateToPage(pageId);
+                });
+            });
+            
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // Login buttons
+            document.getElementById('login-btn').addEventListener('click', login);
+            document.getElementById('admin-login-btn').addEventListener('click', adminLogin);
+            
+            // Login page links
+            document.getElementById('admin-login-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                navigateToPage('adminLogin');
+            });
+            
+            document.getElementById('regular-login-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                navigateToPage('login');
+            });
+            
+            // File upload
+            const dropArea = document.getElementById('drop-area');
+            const fileInput = document.getElementById('file-input');
+            
+            dropArea.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+            
+            // Drag and drop
+            dropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropArea.style.borderColor = 'var(--secondary-color)';
+                dropArea.style.backgroundColor = 'rgba(52, 152, 219, 0.05)';
+            });
+            
+            dropArea.addEventListener('dragleave', () => {
+                dropArea.style.borderColor = 'var(--border-color)';
+                dropArea.style.backgroundColor = 'transparent';
+            });
+            
+            dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropArea.style.borderColor = 'var(--border-color)';
+                dropArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+            
+            // Analyze button
+            document.getElementById('analyze-btn').addEventListener('click', analyzeFiles);
+            
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterResults(this.getAttribute('data-severity'));
+                });
+            });
+            
+            // Admin buttons
+            document.getElementById('retrain-models').addEventListener('click', function() {
+                alert('Model retraining initiated. This process may take several minutes.');
+            });
+            
+            document.getElementById('view-users').addEventListener('click', function() {
+                alert('User management panel would open here in a real application.');
+            });
+            
+            document.getElementById('add-user').addEventListener('click', function() {
+                alert('Add user dialog would open here in a real application.');
+            });
+            
+            document.getElementById('view-logs').addEventListener('click', function() {
+                alert('System logs would display here in a real application.');
+            });
+            
+            document.getElementById('clear-logs').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear logs older than 30 days?')) {
+                    alert('Old logs cleared successfully.');
+                }
+            });
+            
+            // Export and refresh buttons
+            document.getElementById('export-results').addEventListener('click', function() {
+                alert('Results exported successfully. In a real app, this would download a CSV/PDF file.');
+            });
+            
+            document.getElementById('refresh-results').addEventListener('click', function() {
+                loadResults();
+            });
+            
+            // Enter key for login forms
+            document.getElementById('login-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+            
+            document.getElementById('admin-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') adminLogin();
+            });
+        }
+        
+        // Handle file selection
+        function handleFiles(files) {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = '';
+            
+            uploadedFiles = Array.from(files);
+            
+            uploadedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas fa-file-code" style="color: var(--secondary-color);"></i>
+                        <div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${formatFileSize(file.size)}</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger remove-file" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-file').forEach(btn => {
+               
